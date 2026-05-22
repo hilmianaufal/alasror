@@ -72,9 +72,9 @@
         <path d="M12 2v2" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
       </svg>
 
-      <h1>Absensi Jamaah Sholat</h1>
+      <h1>SIDAPDA</h1>
 
-      <p>Markaz Tahfidzul Qur'an Syaikh Shafwan Hakim</p>
+      <p>Sistem Informasi Digital Absensi Pondok Darussalam</p>
     </div>
 
     <div class="form-wrap">
