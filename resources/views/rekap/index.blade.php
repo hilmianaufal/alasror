@@ -1,192 +1,361 @@
 @extends('layouts.app')
-@section('title','Rekap Absensi')
+
+@section('title','Rekap Harian')
+@section('mobile_title','Rekap')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-    <div class="d-flex gap-2">
-  <a href="{{ route('scan.index') }}" class="btn btn-success btn-sm">Scan QR</a>
 
-  {{-- Export mengikuti query filter --}}
-  <a class="btn btn-outline-success btn-sm"
-     href="{{ route('rekap.export.excel', request()->query()) }}">
-    Export Excel
-  </a>
+<x-ui.page-header
+  title="Rekap Harian"
+  subtitle="Monitoring absensi sholat santri"
+  icon="bi-clipboard-data"
+>
+  <x-slot:actions>
 
-  <a class="btn btn-outline-danger btn-sm"
-     href="{{ route('rekap.export.pdf', request()->query()) }}">
-    Export PDF
-  </a>
+    <x-ui.button
+      :href="route('rekap.export.excel', request()->query())"
+      variant="secondary">
+      <i class="bi bi-file-earmark-excel"></i>
+      Excel
+    </x-ui.button>
 
-  <a class="btn btn-outline-warning btn-sm"
-     href="{{ route('rekap.monthly', request()->query()) }}">
-    Rekap Bulanan
-  </a>
+    <x-ui.button
+      :href="route('rekap.export.pdf', request()->query())"
+      variant="secondary">
+      <i class="bi bi-file-earmark-pdf"></i>
+      PDF
+    </x-ui.button>
 
-</div>
-  <div>
-    <h5 class="fw-semibold mb-0">Rekap Absensi</h5>
-    <div class="text-muted small">Rekap per tanggal & sholat</div>
-  </div>
-  <a href="{{ route('scan.index') }}" class="btn btn-success btn-sm">Scan QR</a>
-</div>
+  </x-slot:actions>
+</x-ui.page-header>
 
-{{-- Filter --}}
-<form class="card p-3 mb-3" method="GET">
-  <div class="row g-2 align-items-end">
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Tanggal</label>
-      <input type="date" name="date" class="form-control form-control-sm" value="{{ $date }}">
-    </div>
+{{-- FILTER --}}
+<x-ui.card class="mb-6">
+  <form method="GET">
 
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Sholat</label>
-      <select name="prayer_id" class="form-select form-select-sm">
-        @foreach($prayers as $p)
-          <option value="{{ $p->id }}" @selected($selectedPrayer && $selectedPrayer->id === $p->id)>
-            {{ $p->name }}
-          </option>
-        @endforeach
-      </select>
-    </div>
+    <div class="grid gap-4 lg:grid-cols-5">
 
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Kelas</label>
-      <select name="kelas" class="form-select form-select-sm">
-        <option value="">Semua</option>
-        @foreach($kelasList as $k)
-          <option value="{{ $k }}" @selected($groupKelas===$k)>{{ $k }}</option>
-        @endforeach
-      </select>
-    </div>
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Tanggal
+        </label>
 
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Kamar</label>
-      <select name="kamar" class="form-select form-select-sm">
-        <option value="">Semua</option>
-        @foreach($kamarList as $km)
-          <option value="{{ $km }}" @selected($groupKamar===$km)>{{ $km }}</option>
-        @endforeach
-      </select>
-    </div>
-
-    <div class="col-12 d-grid mt-2">
-      <button class="btn btn-primary btn-sm">Terapkan</button>
-    </div>
-  </div>
-</form>
-
-{{-- Ringkasan --}}
-<div class="row g-2 mb-3">
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Total Santri</div>
-      <div class="fs-6 fw-semibold">{{ $totalStudents }}</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Hadir</div>
-      <div class="fs-6 fw-semibold text-success">{{ $hadirCount }}</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Terlambat</div>
-      <div class="fs-6 fw-semibold text-warning">{{ $terlambatCount }}</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Belum Absen</div>
-      <div class="fs-6 fw-semibold text-danger">{{ $belumCount }}</div>
-    </div>
-  </div>
-</div>
-
-<div class="row g-3">
-  {{-- Sudah Absen --}}
-  <div class="col-12 col-lg-7">
-    <div class="card">
-      <div class="card-header py-2 bg-white">
-        <span class="fw-semibold small">
-          Sudah Absen
-          @if($selectedPrayer)
-            • {{ $selectedPrayer->name }} • {{ $date }}
-          @endif
-        </span>
+        <x-ui.input
+          type="date"
+          name="date"
+          value="{{ $date }}" />
       </div>
 
-      <div class="table-responsive">
-        <table class="table table-sm align-middle mb-0 small">
-          <thead class="table-light">
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Sholat
+        </label>
+
+        <x-ui.select name="prayer_id">
+          @foreach($prayers as $prayer)
+            <option
+              value="{{ $prayer->id }}"
+              @selected($selectedPrayer?->id == $prayer->id)>
+              {{ $prayer->name }}
+            </option>
+          @endforeach
+        </x-ui.select>
+      </div>
+
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Kelas
+        </label>
+
+        <x-ui.select name="kelas">
+          <option value="">Semua</option>
+
+          @foreach($kelasList as $kelas)
+            <option
+              value="{{ $kelas }}"
+              @selected($groupKelas == $kelas)>
+              {{ $kelas }}
+            </option>
+          @endforeach
+        </x-ui.select>
+      </div>
+
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Kamar
+        </label>
+
+        <x-ui.select name="kamar">
+          <option value="">Semua</option>
+
+          @foreach($kamarList as $kamar)
+            <option
+              value="{{ $kamar }}"
+              @selected($groupKamar == $kamar)>
+              {{ $kamar }}
+            </option>
+          @endforeach
+        </x-ui.select>
+      </div>
+
+      <div class="flex items-end">
+        <x-ui.button type="submit" class="w-full justify-center">
+          <i class="bi bi-search"></i>
+          Filter
+        </x-ui.button>
+      </div>
+
+    </div>
+
+  </form>
+</x-ui.card>
+
+{{-- STATS --}}
+<div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+
+  <x-ui.stat-card
+    label="Total Santri"
+    :value="$totalStudents"
+    icon="bi-people"
+    tone="blue" />
+
+  <x-ui.stat-card
+    label="Hadir"
+    :value="$hadirCount"
+    icon="bi-check-circle"
+    tone="emerald" />
+
+  <x-ui.stat-card
+    label="Terlambat"
+    :value="$terlambatCount"
+    icon="bi-clock"
+    tone="amber" />
+
+  <x-ui.stat-card
+    label="Belum Absen"
+    :value="$belumCount"
+    icon="bi-x-circle"
+    tone="red" />
+
+</div>
+
+<div class="grid gap-6 lg:grid-cols-12">
+
+  {{-- SUDAH ABSEN --}}
+  <div class="lg:col-span-8">
+
+    <x-ui.card padding="p-0">
+
+      <div class="flex items-center justify-between border-b border-slate-100 p-5">
+        <div>
+          <div class="text-lg font-black text-slate-900">
+            Sudah Absen
+          </div>
+
+          <div class="text-sm text-slate-500">
+            {{ $attendances->total() }} data
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+
+        <table class="w-full min-w-[720px]">
+
+          <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-400">
             <tr>
-              <th style="width:90px">NIS</th>
-              <th>Nama</th>
-              <th style="width:90px">Status</th>
-              <th class="text-end" style="width:80px">Jam</th>
+              <th class="px-6 py-4">Santri</th>
+              <th class="px-6 py-4">Status</th>
+              <th class="px-6 py-4">Jam Scan</th>
+              <th class="px-6 py-4">Sholat</th>
             </tr>
           </thead>
-          <tbody>
-            @forelse($attendances as $a)
-              <tr>
-                <td class="fw-semibold">{{ $a->student->nis }}</td>
-                <td>
-                  <div class="fw-semibold">{{ $a->student->name }}</div>
-                  <div class="text-muted" style="font-size:12px">
-                    {{ $a->student->kelas ?? '-' }} • {{ $a->student->kamar ?? '-' }}
+
+          <tbody class="divide-y divide-slate-100">
+
+            @forelse($attendances as $attendance)
+
+              <tr class="transition hover:bg-emerald-50/40">
+
+                <td class="px-6 py-4">
+
+                  <div class="flex items-center gap-4">
+
+                    <img
+                      src="{{ $attendance->student->photoUrl() }}"
+                      class="h-14 w-14 rounded-2xl object-cover ring-2 ring-emerald-100">
+
+                    <div>
+                      <div class="font-black text-slate-900">
+                        {{ $attendance->student->name }}
+                      </div>
+
+                      <div class="text-sm font-semibold text-slate-500">
+                        {{ $attendance->student->nis }}
+                      </div>
+
+                      <div class="mt-1 flex gap-2">
+
+                        @if($attendance->student->kelas)
+                          <x-ui.badge tone="blue">
+                            {{ $attendance->student->kelas }}
+                          </x-ui.badge>
+                        @endif
+
+                        @if($attendance->student->kamar)
+                          <x-ui.badge tone="emerald">
+                            {{ $attendance->student->kamar }}
+                          </x-ui.badge>
+                        @endif
+
+                      </div>
+                    </div>
+
                   </div>
+
                 </td>
-                <td>
-                  @if($a->status === 'hadir')
-                    <span class="badge bg-success-subtle text-success">Hadir</span>
+
+                <td class="px-6 py-4">
+
+                  @if($attendance->status === 'hadir')
+                    <x-ui.badge tone="emerald">
+                      Hadir
+                    </x-ui.badge>
+                  @elseif($attendance->status === 'terlambat')
+                    <x-ui.badge tone="amber">
+                      Terlambat
+                    </x-ui.badge>
                   @else
-                    <span class="badge bg-warning-subtle text-warning-emphasis">Telat</span>
+                    <x-ui.badge tone="slate">
+                      {{ ucfirst($attendance->status) }}
+                    </x-ui.badge>
                   @endif
+
                 </td>
-                <td class="text-end fw-semibold">
-                  {{ $a->scanned_at->format('H:i') }}
+
+                <td class="px-6 py-4 font-bold text-slate-600">
+                  {{ \Carbon\Carbon::parse($attendance->scanned_at)->format('H:i:s') }}
                 </td>
+
+                <td class="px-6 py-4">
+                  <x-ui.badge tone="slate">
+                    {{ $selectedPrayer?->name }}
+                  </x-ui.badge>
+                </td>
+
               </tr>
+
             @empty
+
               <tr>
-                <td colspan="4" class="text-center text-muted py-3">
-                  Belum ada yang absen
+                <td colspan="4" class="p-10">
+
+                  <x-ui.empty-state
+                    title="Belum ada absensi"
+                    subtitle="Data scan belum tersedia."
+                    icon="bi-clipboard-x" />
+
                 </td>
               </tr>
+
             @endforelse
+
           </tbody>
+
         </table>
+
       </div>
 
-      <div class="card-footer py-2">
-        {{ $attendances->links() }}
-      </div>
-    </div>
+      @if($attendances->hasPages())
+        <div class="border-t border-slate-100 p-5">
+          {{ $attendances->links() }}
+        </div>
+      @endif
+
+    </x-ui.card>
+
   </div>
 
-  {{-- Belum Absen --}}
-  <div class="col-12 col-lg-5">
-    <div class="card">
-      <div class="card-header py-2 bg-white">
-        <span class="fw-semibold small">Belum Absen</span>
-        <span class="text-muted small">• max 30</span>
+  {{-- BELUM ABSEN --}}
+  <div class="lg:col-span-4">
+
+    <x-ui.card padding="p-0">
+
+      <div class="border-b border-slate-100 p-5">
+
+        <div class="text-lg font-black text-slate-900">
+          Belum Absen
+        </div>
+
+        <div class="text-sm text-slate-500">
+          {{ $absentStudents->count() }} santri
+        </div>
+
       </div>
 
-      <div class="list-group list-group-flush small">
-        @forelse($absentStudents as $s)
-          <div class="list-group-item py-2">
-            <div class="fw-semibold">{{ $s->name }}</div>
-            <div class="text-muted" style="font-size:12px">
-              {{ $s->nis }} • {{ $s->kelas ?? '-' }} • {{ $s->kamar ?? '-' }}
+      <div class="max-h-[720px] overflow-y-auto">
+
+        @forelse($absentStudents as $student)
+
+          <div class="flex items-center gap-4 border-b border-slate-100 p-4">
+
+            <img
+              src="{{ $student->photoUrl() }}"
+              class="h-14 w-14 rounded-2xl object-cover ring-2 ring-red-100">
+
+            <div class="min-w-0 flex-1">
+
+              <div class="truncate font-black text-slate-900">
+                {{ $student->name }}
+              </div>
+
+              <div class="text-sm font-semibold text-slate-500">
+                {{ $student->nis }}
+              </div>
+
+              <div class="mt-2 flex flex-wrap gap-2">
+
+                @if($student->kelas)
+                  <x-ui.badge tone="blue">
+                    {{ $student->kelas }}
+                  </x-ui.badge>
+                @endif
+
+                @if($student->kamar)
+                  <x-ui.badge tone="emerald">
+                    {{ $student->kamar }}
+                  </x-ui.badge>
+                @endif
+
+              </div>
+
             </div>
+
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+              <i class="bi bi-x-lg"></i>
+            </div>
+
           </div>
+
         @empty
-          <div class="list-group-item text-muted py-3">
-            Semua sudah absen 🎉
+
+          <div class="p-8">
+
+            <x-ui.empty-state
+              title="Semua hadir"
+              subtitle="Tidak ada santri yang belum absen."
+              icon="bi-check-circle" />
+
           </div>
+
         @endforelse
+
       </div>
-    </div>
+
+    </x-ui.card>
+
   </div>
+
 </div>
+
 @endsection

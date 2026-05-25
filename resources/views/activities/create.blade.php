@@ -1,113 +1,186 @@
 @extends('layouts.app')
+
 @section('title','Tambah Kegiatan')
+@section('mobile_title','Tambah Kegiatan')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-  <div>
-    <h5 class="fw-semibold mb-0">Tambah Kegiatan</h5>
-    <div class="text-muted small">Buat jadwal kegiatan baru</div>
-  </div>
-  <a href="{{ route('activities.index') }}" class="btn btn-light btn-sm">Kembali</a>
-</div>
 
-@if ($errors->any())
-  <div class="alert alert-danger py-2 small">
-    <ul class="mb-0">
-      @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-      @endforeach
-    </ul>
-  </div>
-@endif
+<x-ui.page-header
+  title="Tambah Kegiatan"
+  subtitle="Buat jadwal kegiatan baru"
+  icon="bi-calendar-plus"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('activities.index')" variant="secondary">
+      Kembali
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
 
-<div class="card p-3">
-  <form method="POST" action="{{ route('activities.store') }}">
-    @csrf
+<form method="POST" action="{{ route('activities.store') }}">
+  @csrf
 
-    <div class="row g-2">
-      <div class="col-12">
-        <label class="form-label small mb-1">Nama Kegiatan</label>
-        <input name="name" class="form-control form-control-sm"
-               value="{{ old('name') }}" required>
-      </div>
+  <div class="grid gap-6 lg:grid-cols-12">
 
-      <div class="col-12 col-md-4">
-        <label class="form-label small mb-1">Tipe</label>
-        <select name="type" id="type" class="form-select form-select-sm" required>
-          <option value="routine" @selected(old('type', 'manual') === 'routine')>Rutin</option>
-          <option value="manual" @selected(old('type', 'manual') === 'manual')>Manual / Event</option>
-        </select>
-      </div>
+    <div class="lg:col-span-8">
+      <x-ui.card>
+        <div class="mb-6">
+          <div class="text-lg font-black text-slate-900">
+            Informasi Kegiatan
+          </div>
+          <div class="mt-1 text-sm font-medium text-slate-500">
+            Atur nama, tipe, hari, tanggal, dan jam kegiatan.
+          </div>
+        </div>
 
-      <div class="col-12 col-md-8" id="daysBox">
-        <label class="form-label small mb-1">Hari Rutin</label>
-        @php
-          $selectedDays = old('days', []);
-          $days = [
-            1 => 'Senin',
-            2 => 'Selasa',
-            3 => 'Rabu',
-            4 => 'Kamis',
-            5 => 'Jumat',
-            6 => 'Sabtu',
-            0 => 'Ahad',
-          ];
-        @endphp
+        <div class="grid gap-5 md:grid-cols-2">
 
-        <div class="d-flex flex-wrap gap-2">
-          @foreach($days as $num => $label)
-            <label class="form-check form-check-inline small">
-              <input class="form-check-input" type="checkbox" name="days[]"
-                     value="{{ $num }}" @checked(in_array($num, $selectedDays ?? []))>
-              {{ $label }}
+          <div class="md:col-span-2">
+            <x-ui.form-group label="Nama Kegiatan" required>
+              <x-ui.input
+                name="name"
+                value="{{ old('name') }}"
+                placeholder="Contoh: Muhadhoroh, Roan, Kajian Malam" />
+            </x-ui.form-group>
+          </div>
+
+          <x-ui.form-group label="Tipe Kegiatan" required>
+            <x-ui.select name="type" id="type">
+              <option value="routine" @selected(old('type', 'manual') === 'routine')>
+                Rutin
+              </option>
+              <option value="manual" @selected(old('type', 'manual') === 'manual')>
+                Manual / Event
+              </option>
+            </x-ui.select>
+          </x-ui.form-group>
+
+          <x-ui.form-group label="Toleransi Telat" required>
+            <x-ui.input
+              type="number"
+              name="late_minutes"
+              min="0"
+              max="180"
+              value="{{ old('late_minutes', 0) }}"
+              placeholder="Menit" />
+          </x-ui.form-group>
+
+          <x-ui.form-group label="Jam Mulai" required>
+            <x-ui.input
+              type="time"
+              name="start_time"
+              value="{{ old('start_time') }}" />
+          </x-ui.form-group>
+
+          <x-ui.form-group label="Jam Selesai" required>
+            <x-ui.input
+              type="time"
+              name="end_time"
+              value="{{ old('end_time') }}" />
+          </x-ui.form-group>
+
+          {{-- Hari Rutin --}}
+          <div class="md:col-span-2" id="daysBox">
+            <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+              Hari Rutin
             </label>
-          @endforeach
+
+            @php
+              $selectedDays = old('days', []);
+              $days = [
+                1 => 'Senin',
+                2 => 'Selasa',
+                3 => 'Rabu',
+                4 => 'Kamis',
+                5 => 'Jumat',
+                6 => 'Sabtu',
+                0 => 'Ahad',
+              ];
+            @endphp
+
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              @foreach($days as $num => $label)
+                <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-600 transition has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50 has-[:checked]:text-emerald-700">
+                  <input
+                    type="checkbox"
+                    name="days[]"
+                    value="{{ $num }}"
+                    class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    @checked(in_array($num, $selectedDays ?? []))>
+                  {{ $label }}
+                </label>
+              @endforeach
+            </div>
+          </div>
+
+          {{-- Tanggal Event --}}
+          <div class="md:col-span-2" id="eventDateBox">
+            <x-ui.form-group label="Tanggal Event">
+              <x-ui.input
+                type="date"
+                name="event_date"
+                value="{{ old('event_date') }}" />
+            </x-ui.form-group>
+          </div>
+
         </div>
-      </div>
+      </x-ui.card>
+    </div>
 
-      <div class="col-12 col-md-4" id="eventDateBox">
-        <label class="form-label small mb-1">Tanggal Event</label>
-        <input type="date" name="event_date" class="form-control form-control-sm"
-               value="{{ old('event_date') }}">
-      </div>
+    <div class="lg:col-span-4">
+      <div class="space-y-6">
 
-      <div class="col-6 col-md-4">
-        <label class="form-label small mb-1">Jam Mulai</label>
-        <input type="time" name="start_time" class="form-control form-control-sm"
-               value="{{ old('start_time') }}" required>
-      </div>
+        <x-ui.card>
+          <div class="mb-4">
+            <div class="text-lg font-black text-slate-900">
+              Status
+            </div>
+            <div class="text-sm text-slate-500">
+              Aktifkan agar kegiatan bisa dipakai untuk scan.
+            </div>
+          </div>
 
-      <div class="col-6 col-md-4">
-        <label class="form-label small mb-1">Jam Selesai</label>
-        <input type="time" name="end_time" class="form-control form-control-sm"
-               value="{{ old('end_time') }}" required>
-      </div>
+          <label class="flex cursor-pointer items-center justify-between rounded-2xl bg-emerald-50 p-4">
+            <div>
+              <div class="text-sm font-black text-emerald-900">
+                Aktif
+              </div>
+              <div class="text-xs font-semibold text-emerald-600">
+                Kegiatan muncul di sistem scan
+              </div>
+            </div>
 
-      <div class="col-6 col-md-4">
-        <label class="form-label small mb-1">Toleransi Telat</label>
-        <input type="number" name="late_minutes" class="form-control form-control-sm"
-               min="0" max="180"
-               value="{{ old('late_minutes', 0) }}" required>
-      </div>
-
-      <div class="col-12">
-        <div class="form-check mt-2">
-          <input class="form-check-input" type="checkbox" name="is_active" value="1"
-                 id="is_active" @checked(old('is_active', true))>
-          <label class="form-check-label small" for="is_active">
-            Aktifkan kegiatan ini
+            <input
+              type="checkbox"
+              name="is_active"
+              value="1"
+              class="h-5 w-5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
+              @checked(old('is_active', true))>
           </label>
-        </div>
-      </div>
+        </x-ui.card>
 
-      <div class="col-12 d-flex gap-2 mt-2">
-        <button class="btn btn-primary btn-sm">Simpan</button>
-        <a href="{{ route('activities.index') }}" class="btn btn-outline-secondary btn-sm">Batal</a>
+        <x-ui.card>
+          <div class="space-y-3">
+            <x-ui.button type="submit" class="w-full justify-center">
+              <i class="bi bi-check-circle"></i>
+              Simpan Kegiatan
+            </x-ui.button>
+
+            <x-ui.button :href="route('activities.index')" variant="secondary" class="w-full justify-center">
+              Batal
+            </x-ui.button>
+          </div>
+        </x-ui.card>
+
       </div>
     </div>
-  </form>
-</div>
 
+  </div>
+</form>
+
+@endsection
+
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const type = document.getElementById('type');
@@ -116,16 +189,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function toggleFields() {
     if (type.value === 'routine') {
-      daysBox.classList.remove('d-none');
-      eventDateBox.classList.add('d-none');
+      daysBox.classList.remove('hidden');
+      eventDateBox.classList.add('hidden');
     } else {
-      daysBox.classList.add('d-none');
-      eventDateBox.classList.remove('d-none');
+      daysBox.classList.add('hidden');
+      eventDateBox.classList.remove('hidden');
     }
   }
 
-  type.addEventListener('change', toggleFields);
+  type?.addEventListener('change', toggleFields);
   toggleFields();
 });
 </script>
-@endsection
+@endpush

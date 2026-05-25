@@ -15,6 +15,7 @@ class Student extends Model
         'is_active',
         'qr_token',
         'photo',
+        'parent_phone',
     ];
 
     protected $casts = [

@@ -1,51 +1,189 @@
 @extends('layouts.app')
+
 @section('title','Jadwal Sholat')
+@section('mobile_title','Jadwal Sholat')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-  <div>
-    <h5 class="fw-semibold mb-0">Jadwal Sholat</h5>
-    <div class="text-muted small">Atur jam buka/tutup scan dan toleransi telat</div>
-  </div>
-  <a href="{{ route('dashboard') }}" class="btn btn-light btn-sm">Dashboard</a>
+
+@php
+  $totalAktif = collect($prayers)->where('is_active', true)->count();
+  $totalOff = collect($prayers)->where('is_active', false)->count();
+@endphp
+
+<x-ui.page-header
+  title="Jadwal Sholat"
+  subtitle="Atur jam buka/tutup scan dan toleransi keterlambatan"
+  icon="bi-clock-history"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('dashboard')" variant="secondary">
+      Dashboard
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
+
+<div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
+  <x-ui.stat-card label="Total Sholat" :value="$prayers->count()" icon="bi-calendar2-week" tone="emerald" />
+  <x-ui.stat-card label="Aktif" :value="$totalAktif" icon="bi-check-circle" tone="blue" />
+  <x-ui.stat-card label="Nonaktif" :value="$totalOff" icon="bi-x-circle" tone="red" />
 </div>
 
-@if(session('success'))
-  <div class="alert alert-success py-2 small">{{ session('success') }}</div>
-@endif
+{{-- Desktop --}}
+<div class="hidden lg:block">
+  <x-ui.card padding="p-0">
+    <div class="flex items-center justify-between border-b border-slate-100 p-5">
+      <div>
+        <div class="text-lg font-black text-slate-900">
+          Daftar Jadwal Sholat
+        </div>
+        <div class="text-sm text-slate-500">
+          Kelola jadwal scan absensi sholat
+        </div>
+      </div>
+    </div>
 
-<div class="card">
-  <div class="table-responsive">
-    <table class="table table-sm align-middle mb-0 small">
-      <thead class="table-light">
-        <tr>
-          <th>Sholat</th>
-          <th style="width:170px;">Jam</th>
-          <th style="width:140px;">Telat</th>
-          <th style="width:90px;">Aktif</th>
-          <th class="text-end" style="width:90px;">Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($prayers as $p)
+    <div class="w-full overflow-x-auto">
+      <table class="w-full min-w-[720px]">
+        <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-400">
           <tr>
-            <td class="fw-semibold">{{ $p->name }}</td>
-            <td class="text-muted">{{ $p->start_time }} – {{ $p->end_time }}</td>
-            <td class="text-muted">{{ $p->late_minutes }} menit</td>
-            <td>
-              @if($p->is_active)
-                <span class="badge bg-success-subtle text-success">Aktif</span>
-              @else
-                <span class="badge bg-secondary-subtle text-secondary">Off</span>
-              @endif
-            </td>
-            <td class="text-end">
-              <a href="{{ route('prayers.edit', $p) }}" class="btn btn-outline-primary btn-sm">Edit</a>
-            </td>
+            <th class="px-6 py-4">Sholat</th>
+            <th class="px-6 py-4">Jam Scan</th>
+            <th class="px-6 py-4">Toleransi</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Aksi</th>
           </tr>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+          @forelse($prayers as $prayer)
+            <tr class="transition hover:bg-emerald-50/40">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600">
+                    <i class="bi bi-moon-stars"></i>
+                  </div>
+
+                  <div>
+                    <div class="font-black text-slate-900">
+                      {{ $prayer->name }}
+                    </div>
+                    <div class="text-sm font-semibold text-slate-500">
+                      Urutan {{ $prayer->order }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="font-black text-slate-900">
+                  {{ substr($prayer->start_time, 0, 5) }}
+                  -
+                  {{ substr($prayer->end_time, 0, 5) }}
+                </div>
+                <div class="text-sm font-semibold text-slate-400">
+                  Buka - tutup scan
+                </div>
+              </td>
+
+              <td class="px-6 py-4">
+                <x-ui.badge tone="amber">
+                  {{ $prayer->late_minutes }} menit
+                </x-ui.badge>
+              </td>
+
+              <td class="px-6 py-4">
+                @if($prayer->is_active)
+                  <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+                @else
+                  <x-ui.badge tone="slate">Off</x-ui.badge>
+                @endif
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="flex justify-end">
+                  <x-ui.button
+                    :href="route('prayers.edit', $prayer)"
+                    variant="secondary">
+                    <i class="bi bi-pencil"></i>
+                    Edit
+                  </x-ui.button>
+                </div>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="5" class="p-8">
+                <x-ui.empty-state
+                  title="Belum ada jadwal"
+                  subtitle="Data sholat belum tersedia."
+                  icon="bi-clock-history" />
+              </td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </x-ui.card>
 </div>
+
+{{-- Mobile --}}
+<div class="space-y-4 lg:hidden">
+  @forelse($prayers as $prayer)
+    <x-ui.card>
+      <div class="flex items-start gap-4">
+        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-2xl text-emerald-600">
+          <i class="bi bi-moon-stars"></i>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-base font-black text-slate-900">
+                {{ $prayer->name }}
+              </div>
+
+              <div class="mt-1 text-sm font-bold text-slate-500">
+                {{ substr($prayer->start_time, 0, 5) }}
+                -
+                {{ substr($prayer->end_time, 0, 5) }}
+              </div>
+            </div>
+
+            @if($prayer->is_active)
+              <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+            @else
+              <x-ui.badge tone="slate">Off</x-ui.badge>
+            @endif
+          </div>
+
+          <div class="mt-3 flex flex-wrap gap-2">
+            <x-ui.badge tone="amber">
+              Telat {{ $prayer->late_minutes }} menit
+            </x-ui.badge>
+
+            <x-ui.badge tone="slate">
+              Urutan {{ $prayer->order }}
+            </x-ui.badge>
+          </div>
+
+          <div class="mt-4">
+            <x-ui.button
+              :href="route('prayers.edit', $prayer)"
+              variant="secondary"
+              class="w-full justify-center">
+              <i class="bi bi-pencil"></i>
+              Edit Jadwal
+            </x-ui.button>
+          </div>
+        </div>
+      </div>
+    </x-ui.card>
+  @empty
+    <x-ui.empty-state
+      title="Belum ada jadwal"
+      subtitle="Data sholat belum tersedia."
+      icon="bi-clock-history" />
+  @endforelse
+</div>
+
 @endsection

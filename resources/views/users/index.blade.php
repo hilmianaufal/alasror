@@ -1,122 +1,276 @@
 @extends('layouts.app')
+
 @section('title','Manajemen User')
+@section('mobile_title','Users')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-  <div>
-    <h5 class="fw-semibold mb-0">Manajemen User</h5>
-    <div class="text-muted small">Kelola akun & role</div>
-  </div>
-  <a href="{{ route('users.create') }}" class="btn btn-success btn-sm">+ Tambah User</a>
+
+<x-ui.page-header
+  title="Manajemen User"
+  subtitle="Kelola akun petugas, admin, dan role"
+  icon="bi-person-gear"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('users.create')">
+      <i class="bi bi-plus-lg"></i>
+      Tambah User
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
+
+<x-ui.card class="mb-6">
+  <form method="GET">
+    <div class="grid gap-4 lg:grid-cols-4">
+
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Cari
+        </label>
+        <x-ui.input
+          name="q"
+          value="{{ $q }}"
+          placeholder="Nama / email / HP..." />
+      </div>
+
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Role
+        </label>
+        <x-ui.select name="role">
+          <option value="">Semua</option>
+          @foreach($roles as $r)
+            <option value="{{ $r }}" @selected($role === $r)>
+              {{ $r }}
+            </option>
+          @endforeach
+        </x-ui.select>
+      </div>
+
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Status
+        </label>
+        <x-ui.select name="status">
+          <option value="">Semua</option>
+          <option value="active" @selected($status === 'active')>Aktif</option>
+          <option value="inactive" @selected($status === 'inactive')>Nonaktif</option>
+        </x-ui.select>
+      </div>
+
+      <div class="flex items-end">
+        <x-ui.button type="submit" class="w-full justify-center">
+          <i class="bi bi-search"></i>
+          Filter
+        </x-ui.button>
+      </div>
+
+    </div>
+  </form>
+</x-ui.card>
+
+{{-- Desktop Table --}}
+<div class="hidden lg:block">
+  <x-ui.card padding="p-0">
+    <div class="flex items-center justify-between border-b border-slate-100 p-5">
+      <div>
+        <div class="text-lg font-black text-slate-900">
+          Daftar User
+        </div>
+        <div class="text-sm text-slate-500">
+          {{ $users->total() }} akun terdaftar
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full overflow-x-auto">
+      <table class="w-full min-w-[820px]">
+        <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-400">
+          <tr>
+            <th class="px-6 py-4">User</th>
+            <th class="px-6 py-4">Role</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Login Terakhir</th>
+            <th class="px-6 py-4 text-right">Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+          @forelse($users as $u)
+            @php
+              $roleName = $u->roles->pluck('name')->first();
+            @endphp
+
+            <tr class="transition hover:bg-emerald-50/40">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-4">
+                  <img
+                    src="{{ method_exists($u, 'avatarUrl') ? $u->avatarUrl() : asset('images/avatar-default.png') }}"
+                    class="h-14 w-14 rounded-2xl object-cover ring-2 ring-emerald-100"
+                    alt="{{ $u->name }}">
+
+                  <div class="min-w-0">
+                    <div class="truncate font-black text-slate-900">
+                      {{ $u->name }}
+                    </div>
+                    <div class="truncate text-sm font-semibold text-slate-500">
+                      {{ $u->email }}
+                    </div>
+                    @if($u->phone)
+                      <div class="text-xs font-semibold text-slate-400">
+                        {{ $u->phone }}
+                      </div>
+                    @endif
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4">
+                @if($roleName)
+                  <x-ui.badge tone="blue">{{ $roleName }}</x-ui.badge>
+                @else
+                  <x-ui.badge tone="slate">-</x-ui.badge>
+                @endif
+              </td>
+
+              <td class="px-6 py-4">
+                @if($u->is_active)
+                  <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+                @else
+                  <x-ui.badge tone="red">Nonaktif</x-ui.badge>
+                @endif
+              </td>
+
+              <td class="px-6 py-4 font-bold text-slate-500">
+                {{ $u->last_login_at ? $u->last_login_at->format('d M Y H:i') : '-' }}
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-2">
+                  <x-ui.button
+                    :href="route('users.edit', $u)"
+                    variant="secondary">
+                    <i class="bi bi-pencil"></i>
+                  </x-ui.button>
+
+                  <form
+                    method="POST"
+                    action="{{ route('users.destroy', $u) }}"
+                    onsubmit="return confirm('Hapus user ini?')">
+                    @csrf
+                    @method('DELETE')
+
+                    <button
+                      class="inline-flex items-center justify-center rounded-2xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      {{ auth()->id() === $u->id ? 'disabled' : '' }}>
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="5" class="p-10">
+                <x-ui.empty-state
+                  title="Belum ada user"
+                  subtitle="Tambahkan akun petugas baru."
+                  icon="bi-person-x" />
+              </td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+
+    @if($users->hasPages())
+      <div class="border-t border-slate-100 p-5">
+        {{ $users->links() }}
+      </div>
+    @endif
+  </x-ui.card>
 </div>
 
-@if(session('success'))
-  <div class="alert alert-success py-2 small mb-2">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-  <div class="alert alert-danger py-2 small mb-2">{{ session('error') }}</div>
-@endif
+{{-- Mobile Cards --}}
+<div class="space-y-4 lg:hidden">
+  @forelse($users as $u)
+    @php
+      $roleName = $u->roles->pluck('name')->first();
+    @endphp
 
-<form class="card p-3 mb-3" method="GET">
-  <div class="row g-2 align-items-end">
-    <div class="col-12 col-md-4">
-      <label class="form-label small mb-1">Cari</label>
-      <input name="q" value="{{ $q }}" class="form-control form-control-sm" placeholder="Nama / email / HP...">
-    </div>
+    <x-ui.card>
+      <div class="flex gap-4">
+        <img
+          src="{{ method_exists($u, 'avatarUrl') ? $u->avatarUrl() : asset('images/avatar-default.png') }}"
+          class="h-16 w-16 rounded-2xl object-cover ring-2 ring-emerald-100"
+          alt="{{ $u->name }}">
 
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Role</label>
-      <select name="role" class="form-select form-select-sm">
-        <option value="">Semua</option>
-        @foreach($roles as $r)
-          <option value="{{ $r }}" @selected($role===$r)>{{ $r }}</option>
-        @endforeach
-      </select>
-    </div>
-
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Status</label>
-      <select name="status" class="form-select form-select-sm">
-        <option value="">Semua</option>
-        <option value="active" @selected($status==='active')>Aktif</option>
-        <option value="inactive" @selected($status==='inactive')>Nonaktif</option>
-      </select>
-    </div>
-
-    <div class="col-12 col-md-2 d-grid">
-      <button class="btn btn-primary btn-sm">Filter</button>
-    </div>
-  </div>
-</form>
-
-<div class="card">
-  <div class="table-responsive" style="-webkit-overflow-scrolling: touch;">
-    <table class="table table-sm align-middle mb-0">
-      <thead class="table-light small">
-        <tr>
-          <th style="width:54px;" class="text-center">Foto</th>
-          <th>Nama</th>
-          <th style="width:120px;">Role</th>
-          <th style="width:90px;" class="text-end">Aksi</th>
-        </tr>
-      </thead>
-
-      <tbody class="small">
-        @forelse($users as $u)
-          @php $roleName = $u->roles->pluck('name')->first(); @endphp
-          <tr>
-            <td class="text-center">
-              <img
-                src="{{ method_exists($u,'avatarUrl') ? $u->avatarUrl() : asset('images/avatar-default.png') }}"
-                class="rounded-circle"
-                style="width:36px;height:36px;object-fit:cover;"
-                alt="avatar">
-            </td>
-
-            <td>
-              <div class="fw-semibold" style="line-height:1.1;">{{ $u->name }}</div>
-              <div class="text-muted" style="font-size:12px;">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="truncate text-base font-black text-slate-900">
+                {{ $u->name }}
+              </div>
+              <div class="truncate text-sm font-semibold text-slate-500">
                 {{ $u->email }}
               </div>
-            </td>
+            </div>
 
-            <td>
-              @if($roleName)
-                <span class="badge bg-primary-subtle text-primary">{{ $roleName }}</span>
-              @else
-                <span class="badge bg-secondary-subtle text-secondary">-</span>
-              @endif
-            </td>
+            @if($u->is_active)
+              <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+            @else
+              <x-ui.badge tone="red">Off</x-ui.badge>
+            @endif
+          </div>
 
-            <td class="text-end">
-              <a href="{{ route('users.edit', $u) }}"
-                 class="btn btn-outline-primary btn-sm px-2"
-                 title="Edit">
-                ✏️
-              </a>
+          <div class="mt-3 flex flex-wrap gap-2">
+            @if($roleName)
+              <x-ui.badge tone="blue">{{ $roleName }}</x-ui.badge>
+            @else
+              <x-ui.badge tone="slate">Tanpa Role</x-ui.badge>
+            @endif
 
-              <form class="d-inline" method="POST" action="{{ route('users.destroy', $u) }}"
-                    onsubmit="return confirm('Hapus user ini?')">
-                @csrf @method('DELETE')
-                <button class="btn btn-outline-danger btn-sm px-2"
-                        title="Hapus"
-                        {{ auth()->id()===$u->id ? 'disabled' : '' }}>
-                  🗑️
-                </button>
-              </form>
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="4" class="text-center text-muted py-4">Belum ada user.</td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
+            @if($u->phone)
+              <x-ui.badge tone="slate">{{ $u->phone }}</x-ui.badge>
+            @endif
+          </div>
 
-  <div class="card-footer py-2">
-    {{ $users->links() }}
-  </div>
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <x-ui.button
+              :href="route('users.edit', $u)"
+              variant="secondary"
+              class="justify-center">
+              Edit
+            </x-ui.button>
+
+            <form
+              method="POST"
+              action="{{ route('users.destroy', $u) }}"
+              onsubmit="return confirm('Hapus user ini?')">
+              @csrf
+              @method('DELETE')
+
+              <button
+                class="w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+                {{ auth()->id() === $u->id ? 'disabled' : '' }}>
+                Hapus
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </x-ui.card>
+  @empty
+    <x-ui.empty-state
+      title="Belum ada user"
+      subtitle="Tambahkan akun petugas baru."
+      icon="bi-person-x" />
+  @endforelse
+
+  @if($users->hasPages())
+    <div class="mt-6">
+      {{ $users->links() }}
+    </div>
+  @endif
 </div>
+
 @endsection

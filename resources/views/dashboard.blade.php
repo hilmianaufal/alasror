@@ -1,127 +1,11 @@
 @extends('layouts.app')
+
 @section('title','Dashboard')
+@section('mobile_title','Dashboard')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-  <div>
-    <h5 class="fw-semibold mb-0">Dashboard</h5>
-    <div class="text-muted small">Ringkasan absensi hari ini • {{ $today }}</div>
-  </div>
-</div>
 
-{{-- MENU BUBBLE (4 kolom per baris) --}}
-<div class="menu-bubble-wrap mb-3">
-  <div class="menu-bubble-title">Menu</div>
-
-  <div class="menu-bubble-card">
-    <div class="menu-bubble-grid">
-
-      @can('scan_qr')
-      <a href="{{ route('scan.index') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-success"><i class="bi bi-qr-code-scan"></i></div>
-        <div class="menu-bubble-label">Scan</div>
-      </a>
-      @endcan
-
-    @can('scan_qr')
-    <a href="{{ route('activities.scan') }}" class="menu-bubble-item">
-      <div class="menu-bubble-icon ic-success"><i class="bi bi-qr-code"></i></div>
-      <div class="menu-bubble-label">Scan Kegiatan</div>
-    </a>
-    @endcan
-
-      @can('manage_students')
-      <a href="{{ route('students.index') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-warning"><i class="bi bi-people"></i></div>
-        <div class="menu-bubble-label">Santri</div>
-      </a>
-      @endcan
-
-      @can('view_reports')
-      <a href="{{ route('rekap.index') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-primary"><i class="bi bi-clipboard-data"></i></div>
-        <div class="menu-bubble-label">Rekap</div>
-      </a>
-
-      <a href="{{ route('rekap.monthly') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-info"><i class="bi bi-calendar3"></i></div>
-        <div class="menu-bubble-label">Bulanan</div>
-      </a>
-      @endcan
-
-      @can('manage_prayers')
-      <a href="{{ route('prayers.index') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-dark"><i class="bi bi-clock-history"></i></div>
-        <div class="menu-bubble-label">Jadwal</div>
-      </a>
-      @endcan
-
-    @can('manage_prayers')
-    <a href="{{ route('activities.index') }}" class="menu-bubble-item">
-      <div class="menu-bubble-icon ic-info"><i class="bi bi-calendar-check"></i></div>
-      <div class="menu-bubble-label">Kegiatan</div>
-    </a>
-    @endcan
-
-    @can('view_reports')
-    <a href="{{ route('activities.recap') }}" class="menu-bubble-item">
-      <div class="menu-bubble-icon ic-primary"><i class="bi bi-clipboard-check"></i></div>
-      <div class="menu-bubble-label">Rekap Kegiatan</div>
-    </a>
-    @endcan
-      @can('manage_users')
-      <a href="{{ route('users.index') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-danger"><i class="bi bi-person-gear"></i></div>
-        <div class="menu-bubble-label">Users</div>
-      </a>
-      @endcan
-
-      {{-- Profil (opsional, belum ada route khusus) --}}
-      @auth
-      <a href="{{ route('profile.show') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-primary"><i class="bi bi-person-circle"></i></div>
-        <div class="menu-bubble-label">Profil</div>
-      </a>
-      @endauth
-
-      {{-- Logout / Login --}}
-      @auth
-      <form method="POST" action="{{ route('logout') }}" class="m-0">
-        @csrf
-        <button type="submit" class="menu-bubble-item w-100 text-start border-0 bg-transparent">
-          <div class="menu-bubble-icon ic-danger"><i class="bi bi-box-arrow-right"></i></div>
-          <div class="menu-bubble-label">Logout</div>
-        </button>
-      </form>
-      @else
-      <a href="{{ route('login') }}" class="menu-bubble-item">
-        <div class="menu-bubble-icon ic-primary"><i class="bi bi-box-arrow-in-right"></i></div>
-        <div class="menu-bubble-label">Login</div>
-      </a>
-      @endauth
-
-    </div>
-  </div>
-</div>
-
-{{-- Banner sholat aktif --}}
-@if($activePrayer)
-  <div class="alert alert-success py-2 d-flex justify-content-between align-items-center">
-    <div class="small">
-      <span class="fw-semibold">Sholat aktif:</span>
-      <span class="fw-semibold">{{ $activePrayer->name }}</span>
-      <span class="text-muted">({{ $activePrayer->start_time }}–{{ $activePrayer->end_time }})</span>
-      <span class="text-muted">• telat: {{ $activePrayer->late_minutes }} menit</span>
-    </div>
-    <span class="badge bg-success">LIVE</span>
-  </div>
-@else
-  <div class="alert alert-warning py-2">
-    <div class="small fw-semibold">Tidak ada sholat aktif saat ini.</div>
-  </div>
-@endif
 @php
-  // Total hari ini dari $items (sudah ada di dashboard kamu)
   $totalHadir = collect($items)->sum('hadir');
   $totalTelat = collect($items)->sum('telat');
   $totalBelum = collect($items)->sum('belum');
@@ -131,65 +15,226 @@
   $dataTelatPerSholat = collect($items)->map(fn($it) => (int) $it['telat'])->values();
 @endphp
 
-<div class="row g-2 mb-3">
-  {{-- Ringkasan angka --}}
-  <div class="col-12 col-lg-4">
-    <div class="card p-3">
-      <div class="d-flex justify-content-between align-items-start">
-        <div>
-          <div class="fw-semibold">Statistik Hari Ini</div>
-          <div class="text-muted small">{{ $today }}</div>
-        </div>
-        <span class="badge bg-success-subtle text-success">LIVE</span>
-      </div>
+<x-ui.page-header
+  title="Dashboard Absensi"
+  subtitle="Ringkasan absensi hari ini • {{ $today }}"
+  icon="bi-speedometer2"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('scan.index')" variant="secondary">
+      <i class="bi bi-qr-code-scan"></i>
+      Scan QR
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
 
-      <div class="row g-2 mt-2">
-        <div class="col-4">
-          <div class="small text-muted">Hadir</div>
-          <div class="fw-bold fs-5 text-success">{{ $totalHadir }}</div>
-        </div>
-        <div class="col-4">
-          <div class="small text-muted">Telat</div>
-          <div class="fw-bold fs-5 text-warning">{{ $totalTelat }}</div>
-        </div>
-        <div class="col-4">
-          <div class="small text-muted">Belum</div>
-          <div class="fw-bold fs-5 text-danger">{{ $totalBelum }}</div>
-        </div>
+{{-- Menu cepat --}}
+<div class="mb-6 grid grid-cols-4 gap-3 lg:grid-cols-8">
+  @can('scan_qr')
+    <a href="{{ route('scan.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white">
+        <i class="bi bi-qr-code-scan"></i>
       </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Scan</div>
+    </a>
 
-      <div class="mt-3">
-        <div class="small text-muted mb-2">Komposisi</div>
-        <div style="height:220px;">
-          <canvas id="chartDonut"></canvas>
-        </div>
+    <a href="{{ route('activities.scan') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-50 text-xl text-lime-600 group-hover:bg-lime-500 group-hover:text-white">
+        <i class="bi bi-qr-code"></i>
       </div>
-    </div>
-  </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Kegiatan</div>
+    </a>
+  @endcan
 
-  {{-- Bar chart: Hadir per sholat --}}
-  <div class="col-12 col-lg-8">
-    <div class="card p-3">
-      <div class="d-flex justify-content-between align-items-start">
-        <div>
-          <div class="fw-semibold">Hadir per Sholat</div>
-          <div class="text-muted small">Hari ini (total santri aktif: {{ $totalStudents }})</div>
-        </div>
+  @can('manage_students')
+    <a href="{{ route('students.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl text-amber-600 group-hover:bg-amber-500 group-hover:text-white">
+        <i class="bi bi-people"></i>
       </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Santri</div>
+    </a>
+  @endcan
 
-      <div class="mt-2" style="height:320px;">
-        <canvas id="chartBar"></canvas>
+  @can('view_reports')
+    <a href="{{ route('rekap.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-xl text-blue-600 group-hover:bg-blue-500 group-hover:text-white">
+        <i class="bi bi-clipboard-data"></i>
       </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Rekap</div>
+    </a>
 
-      <div class="small text-muted mt-2">
-        Tips: bar “Telat” bisa kamu pakai juga kalau mau lihat kedisiplinan.
+    <a href="{{ route('rekap.monthly') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-xl text-cyan-600 group-hover:bg-cyan-500 group-hover:text-white">
+        <i class="bi bi-calendar3"></i>
       </div>
-    </div>
-  </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Bulanan</div>
+    </a>
+  @endcan
+
+  @can('manage_prayers')
+    <a href="{{ route('prayers.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-600 group-hover:bg-slate-800 group-hover:text-white">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Jadwal</div>
+    </a>
+
+    <a href="{{ route('activities.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white">
+        <i class="bi bi-calendar-check"></i>
+      </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Aktivitas</div>
+    </a>
+  @endcan
+
+  @can('manage_users')
+    <a href="{{ route('users.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-xl text-red-600 group-hover:bg-red-500 group-hover:text-white">
+        <i class="bi bi-person-gear"></i>
+      </div>
+      <div class="mt-2 text-xs font-black text-slate-700">Users</div>
+    </a>
+  @endcan
 </div>
 
+{{-- Status sholat aktif --}}
+@if($activePrayer)
+  <div class="mb-6 rounded-[1.75rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 to-lime-50 p-4 shadow-lg shadow-emerald-100">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-200">
+          <i class="bi bi-broadcast"></i>
+        </div>
+        <div>
+          <div class="text-sm font-black text-emerald-950">
+            Sholat aktif: {{ $activePrayer->name }}
+          </div>
+          <div class="text-xs font-semibold text-emerald-700">
+            {{ $activePrayer->start_time }} – {{ $activePrayer->end_time }}
+            • telat {{ $activePrayer->late_minutes }} menit
+          </div>
+        </div>
+      </div>
+
+      <x-ui.badge tone="emerald">LIVE</x-ui.badge>
+    </div>
+  </div>
+@else
+  <div class="mb-6 rounded-[1.75rem] border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-700">
+    Tidak ada sholat aktif saat ini.
+  </div>
+@endif
+
+{{-- Stats --}}
+<div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <x-ui.stat-card label="Total Santri" :value="$totalStudents" icon="bi-people" tone="emerald" />
+  <x-ui.stat-card label="Hadir" :value="$totalHadir" icon="bi-check-circle" tone="blue" />
+  <x-ui.stat-card label="Terlambat" :value="$totalTelat" icon="bi-clock" tone="amber" />
+  <x-ui.stat-card label="Belum" :value="$totalBelum" icon="bi-x-circle" tone="red" />
+</div>
+
+{{-- Charts + Jadwal --}}
+<div class="grid gap-6 lg:grid-cols-12">
+
+  <x-ui.card class="lg:col-span-5">
+    <div class="mb-4 flex items-center justify-between">
+      <div>
+        <div class="text-lg font-black text-slate-900">Komposisi Hari Ini</div>
+        <div class="text-sm font-medium text-slate-500">{{ $today }}</div>
+      </div>
+      <x-ui.badge tone="emerald">Realtime</x-ui.badge>
+    </div>
+
+    <div class="h-72">
+      <canvas id="chartDonut"></canvas>
+    </div>
+  </x-ui.card>
+
+  <x-ui.card class="lg:col-span-7">
+    <div class="mb-4">
+      <div class="text-lg font-black text-slate-900">Hadir per Sholat</div>
+      <div class="text-sm font-medium text-slate-500">
+        Total santri aktif: {{ $totalStudents }}
+      </div>
+    </div>
+
+    <div class="h-72">
+      <canvas id="chartBar"></canvas>
+    </div>
+  </x-ui.card>
+
+</div>
+
+<x-ui.card class="mt-6" padding="p-0">
+  <div class="flex items-center justify-between border-b border-slate-100 p-4">
+    <div>
+      <div class="text-lg font-black text-slate-900">Jadwal Sholat</div>
+      <div class="text-sm text-slate-500">Status hari ini</div>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[640px] text-left text-sm">
+      <thead class="bg-slate-50 text-xs font-black uppercase tracking-wide text-slate-400">
+        <tr>
+          <th class="px-4 py-3">Sholat</th>
+          <th class="px-4 py-3">Jam</th>
+          <th class="px-4 py-3">Telat</th>
+          <th class="px-4 py-3">Hadir</th>
+          <th class="px-4 py-3">Telat</th>
+          <th class="px-4 py-3">Belum</th>
+          <th class="px-4 py-3 text-right">Status</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100">
+        @foreach($items as $it)
+          @php
+            $p = $it['prayer'];
+            $st = $it['status'];
+          @endphp
+
+          <tr class="hover:bg-emerald-50/40">
+            <td class="px-4 py-4 font-black text-slate-800">
+              {{ $p->name }}
+            </td>
+            <td class="px-4 py-4 font-semibold text-slate-500">
+              {{ $p->start_time }} – {{ $p->end_time }}
+            </td>
+            <td class="px-4 py-4 font-semibold text-slate-500">
+              {{ $p->late_minutes }} menit
+            </td>
+            <td class="px-4 py-4 font-black text-emerald-600">
+              {{ $it['hadir'] }}
+            </td>
+            <td class="px-4 py-4 font-black text-amber-600">
+              {{ $it['telat'] }}
+            </td>
+            <td class="px-4 py-4 font-black text-red-600">
+              {{ $it['belum'] }}
+            </td>
+            <td class="px-4 py-4 text-right">
+              @if($st === 'live')
+                <x-ui.badge tone="emerald">LIVE</x-ui.badge>
+              @elseif($st === 'soon')
+                <x-ui.badge tone="slate">Soon</x-ui.badge>
+              @else
+                <x-ui.badge tone="dark">Closed</x-ui.badge>
+              @endif
+            </td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</x-ui.card>
+
+@endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-  // Data dari PHP -> JS
   const donutData = {
     hadir: @json((int) $totalHadir),
     telat: @json((int) $totalTelat),
@@ -200,9 +245,7 @@
   const hadirPerSholat = @json($dataHadirPerSholat);
   const telatPerSholat = @json($dataTelatPerSholat);
 
-  // Doughnut Chart
-  const ctxDonut = document.getElementById('chartDonut');
-  new Chart(ctxDonut, {
+  new Chart(document.getElementById('chartDonut'), {
     type: 'doughnut',
     data: {
       labels: ['Hadir', 'Telat', 'Belum'],
@@ -214,16 +257,16 @@
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '68%',
+      cutout: '70%',
       plugins: {
-        legend: { position: 'bottom' }
+        legend: {
+          position: 'bottom'
+        }
       }
     }
   });
 
-  // Bar Chart
-  const ctxBar = document.getElementById('chartBar');
-  new Chart(ctxBar, {
+  new Chart(document.getElementById('chartBar'), {
     type: 'bar',
     data: {
       labels: labelsSholat,
@@ -236,128 +279,17 @@
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: { beginAtZero: true, ticks: { precision: 0 } }
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
       },
       plugins: {
-        legend: { position: 'bottom' },
-        tooltip: { enabled: true }
+        legend: {
+          position: 'bottom'
+        }
       }
     }
   });
 </script>
-
-{{-- Jadwal sholat --}}
-<div class="card mb-3">
-  <div class="card-header bg-white py-2">
-    <span class="fw-semibold small">Jadwal Sholat</span>
-    <span class="text-muted small">• hari ini</span>
-  </div>
-
-  <div class="table-responsive">
-    <table class="table table-sm align-middle mb-0 small">
-      <thead class="table-light">
-        <tr>
-          <th>Sholat</th>
-          <th style="width:150px;">Jam</th>
-          <th style="width:120px;">Telat</th>
-          <th style="width:90px;">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($items as $it)
-          @php
-            $p = $it['prayer'];
-            $st = $it['status'];
-          @endphp
-          <tr>
-            <td class="fw-semibold">{{ $p->name }}</td>
-            <td class="text-muted">{{ $p->start_time }} – {{ $p->end_time }}</td>
-            <td class="text-muted">{{ $p->late_minutes }} menit</td>
-            <td>
-              @if($st === 'live')
-                <span class="badge bg-success-subtle text-success">LIVE</span>
-              @elseif($st === 'soon')
-                <span class="badge bg-secondary-subtle text-secondary">Soon</span>
-              @else
-                <span class="badge bg-dark-subtle text-dark">Closed</span>
-              @endif
-            </td>
-          </tr>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
-
-  <div class="card-footer py-2 small text-muted">
-    Total santri aktif: <span class="fw-semibold">{{ $totalStudents }}</span>
-  </div>
-</div>
-
-{{-- Ringkasan per sholat --}}
-<div class="row g-2">
-  @foreach($items as $it)
-    @php
-      $p = $it['prayer'];
-      $st = $it['status'];
-    @endphp
-
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card p-2">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <div class="fw-semibold small mb-0">{{ $p->name }}</div>
-            <div class="text-muted" style="font-size:12px;">
-              {{ $p->start_time }}–{{ $p->end_time }}
-            </div>
-          </div>
-
-          <div class="text-end">
-            @if($st === 'live')
-              <span class="badge bg-success">LIVE</span>
-            @elseif($st === 'soon')
-              <span class="badge bg-secondary">Soon</span>
-            @else
-              <span class="badge bg-dark">Closed</span>
-            @endif
-          </div>
-        </div>
-
-        <div class="row g-2 mt-2 small">
-          <div class="col-4">
-            <div class="text-muted">Hadir</div>
-            <div class="fw-semibold text-success">{{ $it['hadir'] }}</div>
-          </div>
-          <div class="col-4">
-            <div class="text-muted">Telat</div>
-            <div class="fw-semibold text-warning">{{ $it['telat'] }}</div>
-          </div>
-          <div class="col-4">
-            <div class="text-muted">Belum</div>
-            <div class="fw-semibold text-danger">{{ $it['belum'] }}</div>
-          </div>
-        </div>
-
-        <div class="mt-2">
-          <div class="d-flex justify-content-between small text-muted">
-            <span>Progress</span>
-            <span class="fw-semibold">{{ $it['progress'] }}%</span>
-          </div>
-          <div class="progress" style="height: 6px;">
-            <div class="progress-bar" role="progressbar" style="width: {{ $it['progress'] }}%"></div>
-          </div>
-        </div>
-
-        <div class="d-flex gap-2 mt-2">
-          <a class="btn btn-outline-primary btn-sm w-100"
-             href="{{ route('rekap.index', ['date'=>$today, 'prayer_id'=>$p->id]) }}">
-            Rekap
-          </a>
-        </div>
-      </div>
-    </div>
-  @endforeach
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-@endsection
+@endpush

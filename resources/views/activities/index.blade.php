@@ -1,76 +1,9 @@
 @extends('layouts.app')
+
 @section('title','Jadwal Kegiatan')
+@section('mobile_title','Kegiatan')
 
 @section('content')
-<style>
-  .activity-hero {
-    background: linear-gradient(135deg, #0f766e, #16a34a);
-    border-radius: 24px;
-    padding: 20px;
-    color: #fff;
-    box-shadow: 0 14px 35px rgba(15, 118, 110, .25);
-  }
-
-  .premium-card {
-    border: 0;
-    border-radius: 22px;
-    box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
-    overflow: hidden;
-  }
-
-  .activity-item {
-    border: 1px solid #eef2f7;
-    border-radius: 20px;
-    padding: 15px;
-    background: #fff;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, .06);
-  }
-
-  .activity-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 17px;
-    background: linear-gradient(135deg, #dcfce7, #ccfbf1);
-    color: #0f766e;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-
-  .soft-badge {
-    border-radius: 999px;
-    padding: 5px 10px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-
-  .action-pill {
-    border-radius: 999px;
-    padding: 6px 12px;
-  }
-
-  .info-pill {
-    border-radius: 999px;
-    padding: 6px 10px;
-    font-size: 12px;
-    background: #f8fafc;
-    border: 1px solid #eef2f7;
-  }
-
-  @media (max-width: 767.98px) {
-    .desktop-table {
-      display: none;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .mobile-list {
-      display: none;
-    }
-  }
-</style>
 
 @php
   $dayNames = [
@@ -88,232 +21,243 @@
   $totalManual = collect($activities)->where('type', 'manual')->count();
 @endphp
 
-<div class="activity-hero mb-3">
-  <div class="d-flex justify-content-between align-items-start gap-3">
-    <div>
-      <div class="small opacity-75 mb-1">Manajemen Jadwal</div>
-      <h4 class="fw-bold mb-1">Jadwal Kegiatan</h4>
-      <div class="small opacity-75">
-        Atur kegiatan rutin, absen dadakan, check in, dan check out
-      </div>
-    </div>
+<x-ui.page-header
+  title="Jadwal Kegiatan"
+  subtitle="Kelola kegiatan rutin, event, dan absensi kegiatan"
+  icon="bi-calendar-check"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('activities.create')">
+      <i class="bi bi-plus-lg"></i>
+      Tambah
+    </x-ui.button>
 
-    <a href="{{ route('activities.create') }}"
-       class="btn btn-light btn-sm rounded-pill fw-semibold">
-      + Tambah
-    </a>
-  </div>
+    <x-ui.button :href="route('activities.scan')" variant="secondary">
+      <i class="bi bi-qr-code"></i>
+      Scan
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
 
-  <div class="row g-2 mt-3">
-    <div class="col-4">
-      <div class="bg-white bg-opacity-25 rounded-4 p-2 text-center">
-        <div class="small opacity-75">Aktif</div>
-        <div class="fw-bold fs-5">{{ $totalAktif }}</div>
-      </div>
-    </div>
-
-    <div class="col-4">
-      <div class="bg-white bg-opacity-25 rounded-4 p-2 text-center">
-        <div class="small opacity-75">Rutin</div>
-        <div class="fw-bold fs-5">{{ $totalRutin }}</div>
-      </div>
-    </div>
-
-    <div class="col-4">
-      <div class="bg-white bg-opacity-25 rounded-4 p-2 text-center">
-        <div class="small opacity-75">Manual</div>
-        <div class="fw-bold fs-5">{{ $totalManual }}</div>
-      </div>
-    </div>
-  </div>
+<div class="mb-6 grid grid-cols-3 gap-4">
+  <x-ui.stat-card label="Aktif" :value="$totalAktif" icon="bi-check-circle" tone="emerald" />
+  <x-ui.stat-card label="Rutin" :value="$totalRutin" icon="bi-calendar-week" tone="blue" />
+  <x-ui.stat-card label="Manual" :value="$totalManual" icon="bi-lightning" tone="amber" />
 </div>
 
-@if(session('success'))
-  <div class="alert alert-success py-2 small rounded-4">
-    {{ session('success') }}
-  </div>
-@endif
+{{-- Desktop Table --}}
+<div class="hidden lg:block">
+  <x-ui.card padding="p-0">
+    <div class="flex items-center justify-between border-b border-slate-100 p-5">
+      <div>
+        <div class="text-lg font-black text-slate-900">
+          Daftar Kegiatan
+        </div>
+        <div class="text-sm text-slate-500">
+          Total {{ count($activities) }} kegiatan
+        </div>
+      </div>
+    </div>
 
-<div class="d-flex justify-content-between align-items-center mb-2">
-  <div class="fw-semibold small">Daftar Kegiatan</div>
+    <div class="w-full overflow-x-auto">
+      <table class="w-full min-w-[820px]">
+        <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-400">
+          <tr>
+            <th class="px-6 py-4">Kegiatan</th>
+            <th class="px-6 py-4">Tipe</th>
+            <th class="px-6 py-4">Hari / Tanggal</th>
+            <th class="px-6 py-4">Jam</th>
+            <th class="px-6 py-4">Telat</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Aksi</th>
+          </tr>
+        </thead>
 
-  <a href="{{ route('dashboard') }}"
-     class="btn btn-light btn-sm rounded-pill">
-    Dashboard
-  </a>
+        <tbody class="divide-y divide-slate-100">
+          @forelse($activities as $activity)
+            <tr class="transition hover:bg-emerald-50/40">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600">
+                    <i class="bi {{ $activity->type === 'routine' ? 'bi-calendar-week' : 'bi-lightning-charge' }}"></i>
+                  </div>
+
+                  <div>
+                    <div class="font-black text-slate-900">
+                      {{ $activity->name }}
+                    </div>
+                    <div class="text-sm font-semibold text-slate-500">
+                      Urutan {{ $activity->order }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4">
+                @if($activity->type === 'routine')
+                  <x-ui.badge tone="blue">Rutin</x-ui.badge>
+                @else
+                  <x-ui.badge tone="amber">Manual</x-ui.badge>
+                @endif
+              </td>
+
+              <td class="px-6 py-4">
+                @if($activity->type === 'routine')
+                  <div class="flex flex-wrap gap-2">
+                    @forelse(($activity->days ?? []) as $day)
+                      <x-ui.badge tone="slate">
+                        {{ $dayNames[$day] ?? $day }}
+                      </x-ui.badge>
+                    @empty
+                      <span class="text-sm font-bold text-slate-400">-</span>
+                    @endforelse
+                  </div>
+                @else
+                  <span class="text-sm font-bold text-slate-600">
+                    {{ $activity->event_date ? $activity->event_date->format('d M Y') : '-' }}
+                  </span>
+                @endif
+              </td>
+
+              <td class="px-6 py-4 font-bold text-slate-500">
+                {{ substr($activity->start_time, 0, 5) }}
+                -
+                {{ substr($activity->end_time, 0, 5) }}
+              </td>
+
+              <td class="px-6 py-4 font-bold text-slate-500">
+                {{ $activity->late_minutes }} menit
+              </td>
+
+              <td class="px-6 py-4">
+                @if($activity->is_active)
+                  <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+                @else
+                  <x-ui.badge tone="slate">Off</x-ui.badge>
+                @endif
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-2">
+                  <x-ui.button
+                    :href="route('activities.edit', $activity)"
+                    variant="secondary">
+                    <i class="bi bi-pencil"></i>
+                  </x-ui.button>
+
+                  <form
+                    method="POST"
+                    action="{{ route('activities.destroy', $activity) }}"
+                    onsubmit="return confirm('Hapus kegiatan ini?')">
+                    @csrf
+                    @method('DELETE')
+
+                    <button
+                      class="inline-flex items-center justify-center rounded-2xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-100">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="7" class="p-8">
+                <x-ui.empty-state
+                  title="Belum ada kegiatan"
+                  subtitle="Tambahkan jadwal kegiatan baru."
+                  icon="bi-calendar-check" />
+              </td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </x-ui.card>
 </div>
 
-{{-- Mobile Premium Card --}}
-<div class="mobile-list d-grid gap-2">
-  @forelse($activities as $a)
-    <div class="activity-item">
-      <div class="d-flex gap-3">
-        <div class="activity-icon">
-          @if($a->type === 'routine')
-            📅
-          @else
-            ⚡
-          @endif
+{{-- Mobile Cards --}}
+<div class="space-y-4 lg:hidden">
+  @forelse($activities as $activity)
+    <x-ui.card>
+      <div class="flex gap-4">
+        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-2xl text-emerald-600">
+          <i class="bi {{ $activity->type === 'routine' ? 'bi-calendar-week' : 'bi-lightning-charge' }}"></i>
         </div>
 
-        <div class="flex-grow-1 min-w-0">
-          <div class="d-flex justify-content-between gap-2 align-items-start">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-2">
             <div>
-              <div class="fw-bold">{{ $a->name }}</div>
+              <div class="truncate text-base font-black text-slate-900">
+                {{ $activity->name }}
+              </div>
 
-              <div class="small text-muted mt-1">
-                {{ substr($a->start_time, 0, 5) }}
+              <div class="mt-1 text-sm font-bold text-slate-500">
+                {{ substr($activity->start_time, 0, 5) }}
                 -
-                {{ substr($a->end_time, 0, 5) }}
-                • telat {{ $a->late_minutes }} menit
+                {{ substr($activity->end_time, 0, 5) }}
               </div>
             </div>
 
-            @if($a->is_active)
-              <span class="soft-badge bg-success-subtle text-success">Aktif</span>
+            @if($activity->is_active)
+              <x-ui.badge tone="emerald">Aktif</x-ui.badge>
             @else
-              <span class="soft-badge bg-secondary-subtle text-secondary">Off</span>
+              <x-ui.badge tone="slate">Off</x-ui.badge>
             @endif
           </div>
 
-          <div class="d-flex gap-1 flex-wrap mt-2">
-            @if($a->type === 'routine')
-              <span class="soft-badge bg-primary-subtle text-primary">Rutin</span>
+          <div class="mt-3 flex flex-wrap gap-2">
+            @if($activity->type === 'routine')
+              <x-ui.badge tone="blue">Rutin</x-ui.badge>
 
-              @foreach(($a->days ?? []) as $d)
-                <span class="info-pill">{{ $dayNames[$d] ?? $d }}</span>
+              @foreach(($activity->days ?? []) as $day)
+                <x-ui.badge tone="slate">
+                  {{ $dayNames[$day] ?? $day }}
+                </x-ui.badge>
               @endforeach
             @else
-              <span class="soft-badge bg-warning-subtle text-warning-emphasis">Manual</span>
-              <span class="info-pill">
-                {{ $a->event_date ? $a->event_date->format('d M Y') : 'Belum ada tanggal' }}
-              </span>
+              <x-ui.badge tone="amber">Manual</x-ui.badge>
+
+              <x-ui.badge tone="slate">
+                {{ $activity->event_date ? $activity->event_date->format('d M Y') : '-' }}
+              </x-ui.badge>
             @endif
+
+            <x-ui.badge tone="slate">
+              Telat {{ $activity->late_minutes }} menit
+            </x-ui.badge>
           </div>
 
-          <div class="d-flex gap-2 mt-3">
-            <a href="{{ route('activities.edit', $a) }}"
-               class="btn btn-outline-primary btn-sm action-pill flex-fill">
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <x-ui.button
+              :href="route('activities.edit', $activity)"
+              variant="secondary"
+              class="justify-center">
               Edit
-            </a>
+            </x-ui.button>
 
-            <form method="POST"
-                  action="{{ route('activities.destroy', $a) }}"
-                  onsubmit="return confirm('Hapus kegiatan ini?')"
-                  class="flex-fill">
+            <form
+              method="POST"
+              action="{{ route('activities.destroy', $activity) }}"
+              onsubmit="return confirm('Hapus kegiatan ini?')">
               @csrf
               @method('DELETE')
 
-              <button class="btn btn-outline-danger btn-sm action-pill w-100">
+              <button
+                class="w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-black text-red-600 transition hover:bg-red-100">
                 Hapus
               </button>
             </form>
           </div>
         </div>
       </div>
-    </div>
+    </x-ui.card>
   @empty
-    <div class="activity-item text-center text-muted py-4">
-      Belum ada kegiatan.
-    </div>
+    <x-ui.empty-state
+      title="Belum ada kegiatan"
+      subtitle="Tambahkan jadwal kegiatan baru."
+      icon="bi-calendar-check" />
   @endforelse
-</div>
-
-{{-- Desktop Table --}}
-<div class="card premium-card desktop-table">
-  <div class="table-responsive">
-    <table class="table table-hover table-sm align-middle mb-0 small">
-      <thead class="table-light">
-        <tr>
-          <th>Kegiatan</th>
-          <th>Tipe</th>
-          <th>Hari/Tanggal</th>
-          <th>Jam</th>
-          <th>Telat</th>
-          <th>Status</th>
-          <th class="text-end">Aksi</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        @forelse($activities as $a)
-          <tr>
-            <td class="fw-semibold">
-              <div class="d-flex align-items-center gap-2">
-                <div class="activity-icon" style="width:34px;height:34px;border-radius:12px;">
-                  {{ $a->type === 'routine' ? '📅' : '⚡' }}
-                </div>
-                <span>{{ $a->name }}</span>
-              </div>
-            </td>
-
-            <td>
-              @if($a->type === 'routine')
-                <span class="soft-badge bg-primary-subtle text-primary">Rutin</span>
-              @else
-                <span class="soft-badge bg-warning-subtle text-warning-emphasis">Manual</span>
-              @endif
-            </td>
-
-            <td>
-              @if($a->type === 'routine')
-                <div class="d-flex gap-1 flex-wrap">
-                  @foreach(($a->days ?? []) as $d)
-                    <span class="info-pill">{{ $dayNames[$d] ?? $d }}</span>
-                  @endforeach
-                </div>
-              @else
-                <span class="text-muted">
-                  {{ $a->event_date ? $a->event_date->format('d M Y') : '-' }}
-                </span>
-              @endif
-            </td>
-
-            <td class="text-muted">
-              {{ substr($a->start_time, 0, 5) }}
-              -
-              {{ substr($a->end_time, 0, 5) }}
-            </td>
-
-            <td class="text-muted">{{ $a->late_minutes }} menit</td>
-
-            <td>
-              @if($a->is_active)
-                <span class="soft-badge bg-success-subtle text-success">Aktif</span>
-              @else
-                <span class="soft-badge bg-secondary-subtle text-secondary">Off</span>
-              @endif
-            </td>
-
-            <td class="text-end">
-              <a href="{{ route('activities.edit', $a) }}"
-                 class="btn btn-outline-primary btn-sm rounded-pill">
-                Edit
-              </a>
-
-              <form method="POST"
-                    action="{{ route('activities.destroy', $a) }}"
-                    class="d-inline"
-                    onsubmit="return confirm('Hapus kegiatan ini?')">
-                @csrf
-                @method('DELETE')
-
-                <button class="btn btn-outline-danger btn-sm rounded-pill">
-                  Hapus
-                </button>
-              </form>
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="7" class="text-center text-muted py-4">
-              Belum ada kegiatan.
-            </td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
 </div>
 
 @endsection

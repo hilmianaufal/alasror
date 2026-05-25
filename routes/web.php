@@ -20,10 +20,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/tes-waktu', function (){
     return Carbon::now('Asia/Makassar')->format('Y-m-d H:i:s');
 });
-
+Route::get('/students/{student}/id-card', [StudentQrController::class, 'idCard'])
+    ->name('students.id-card');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+Route::get('/students/search/realtime', [StudentController::class, 'searchRealtime'])
+    ->name('students.search.realtime');
 
 // Dashboard & rekap boleh untuk yang punya view_reports
 Route::middleware(['auth', 'permission:view_reports'])->group(function () {

@@ -78,6 +78,7 @@ class ActivityScanController extends Controller
                     'name' => $student->name,
                     'kelas' => $student->kelas,
                     'kamar' => $student->kamar,
+                    'photo_url' => $student->photoUrl(),
                 ],
             ]);
         }
@@ -104,6 +105,8 @@ class ActivityScanController extends Controller
                 'name' => $student->name,
                 'kelas' => $student->kelas,
                 'kamar' => $student->kamar,
+                'photo_url' => $student->photoUrl(),
+
             ],
         ]);
     }

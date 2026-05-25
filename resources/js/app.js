@@ -1,4 +1,4 @@
 import './bootstrap';
-import { registerSW } from 'virtual:pwa-register';
+import html2canvas from 'html2canvas';
 
-registerSW({ immediate: true });
+window.html2canvas = html2canvas;

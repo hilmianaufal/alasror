@@ -1,105 +1,138 @@
 @extends('layouts.app')
-@section('title','Detail Absensi Santri')
+
+@section('title','Riwayat Absensi Santri')
+@section('mobile_title','Riwayat Absensi')
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-  <div>
-    <h5 class="fw-semibold mb-0">Detail Absensi</h5>
-    <div class="text-muted small">
-      {{ $student->name }} • {{ $student->nis }} • {{ $month }}
+
+<x-ui.page-header
+  title="Riwayat Absensi"
+  subtitle="{{ $student->name }} • {{ $student->nis }} • {{ $month }}"
+  icon="bi-calendar-check"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('students.show', $student)" variant="secondary">
+      Profil
+    </x-ui.button>
+
+    <x-ui.button :href="route('rekap.monthly', ['month' => $month])" variant="secondary">
+      Rekap Bulanan
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
+
+<x-ui.card class="mb-6">
+  <form method="GET">
+    <div class="grid gap-4 md:grid-cols-4">
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Bulan
+        </label>
+
+        <x-ui.input
+          type="month"
+          name="month"
+          value="{{ $month }}" />
+      </div>
+
+      <div class="flex items-end">
+        <x-ui.button type="submit" class="w-full">
+          <i class="bi bi-filter"></i>
+          Terapkan
+        </x-ui.button>
+      </div>
     </div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{{ route('students.show', $student) }}" class="btn btn-light btn-sm">Profil</a>
-    <a href="{{ route('rekap.monthly', ['month'=>$month]) }}" class="btn btn-outline-primary btn-sm">Rekap Bulanan</a>
-  </div>
+  </form>
+</x-ui.card>
+
+<div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
+  <x-ui.stat-card label="Expected" :value="$expected" icon="bi-calendar2-check" tone="emerald" />
+  <x-ui.stat-card label="Total Scan" :value="$scanTotal" icon="bi-qr-code-scan" tone="blue" />
+  <x-ui.stat-card label="Hadir" :value="$hadir" icon="bi-check-circle" tone="emerald" />
+  <x-ui.stat-card label="Terlambat" :value="$telat" icon="bi-clock" tone="amber" />
+  <x-ui.stat-card label="Belum" :value="$belum" icon="bi-x-circle" tone="red" />
 </div>
 
-<form class="card p-3 mb-3" method="GET">
-  <div class="row g-2 align-items-end">
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Bulan</label>
-      <input type="month" name="month" value="{{ $month }}" class="form-control form-control-sm">
+<x-ui.card padding="p-0">
+  <div class="flex flex-col gap-2 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div class="text-lg font-black text-slate-900">
+        Kalender Absensi
+      </div>
+      <div class="text-sm font-medium text-slate-500">
+        H = Hadir • T = Telat • - = Belum
+      </div>
     </div>
-    <div class="col-6 col-md-3 d-grid">
-      <button class="btn btn-primary btn-sm">Terapkan</button>
-    </div>
-  </div>
-</form>
-
-{{-- Ringkasan --}}
-<div class="row g-2 mb-3">
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Expected</div>
-      <div class="fw-semibold">{{ $expected }}</div>
-      <div class="text-muted" style="font-size:12px;">({{ count($dates) }} hari × {{ $prayers->count() }} sholat)</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Total Scan</div>
-      <div class="fw-semibold">{{ $scanTotal }}</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Hadir</div>
-      <div class="fw-semibold text-success">{{ $hadir }}</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card p-2">
-      <div class="text-muted small">Terlambat</div>
-      <div class="fw-semibold text-warning">{{ $telat }}</div>
-      <div class="text-muted" style="font-size:12px;">Belum: {{ $belum }}</div>
-    </div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-    <span class="fw-semibold small">Kalender Absensi</span>
-    <span class="text-muted small">H=Hadir • T=Telat • -=Belum</span>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-sm align-middle mb-0 small">
-      <thead class="table-light">
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[720px] text-left text-sm">
+      <thead class="bg-slate-50 text-xs font-black uppercase tracking-wide text-slate-400">
         <tr>
-          <th style="width:120px;">Tanggal</th>
+          <th class="px-5 py-4">Tanggal</th>
+
           @foreach($prayers as $p)
-            <th class="text-center" style="min-width:70px;">{{ $p->name }}</th>
+            <th class="px-5 py-4 text-center">
+              {{ $p->name }}
+            </th>
           @endforeach
         </tr>
       </thead>
-      <tbody>
+
+      <tbody class="divide-y divide-slate-100">
         @foreach($dates as $d)
           @php
             $carbon = \Illuminate\Support\Carbon::parse($d);
             $isFriday = $carbon->dayOfWeek === 5;
             $isSunday = $carbon->dayOfWeek === 0;
           @endphp
-          <tr @class(['table-warning' => $isFriday, 'table-light' => $isSunday])>
-            <td class="fw-semibold">
-              {{ $carbon->format('d M') }}
-              <div class="text-muted" style="font-size:12px;">{{ $carbon->translatedFormat('l') }}</div>
+
+          <tr class="
+            transition
+            {{ $isFriday ? 'bg-amber-50/60' : '' }}
+            {{ $isSunday ? 'bg-slate-50/80' : '' }}
+            hover:bg-emerald-50/50
+          ">
+            <td class="px-5 py-4">
+              <div class="font-black text-slate-900">
+                {{ $carbon->format('d M') }}
+              </div>
+              <div class="text-xs font-semibold text-slate-400">
+                {{ $carbon->translatedFormat('l') }}
+              </div>
             </td>
 
             @foreach($prayers as $p)
               @php
                 $cell = $map[$d][$p->id] ?? null;
               @endphp
-              <td class="text-center">
+
+              <td class="px-5 py-4 text-center">
                 @if(!$cell)
-                  <span class="text-muted">-</span>
+                  <span class="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-slate-400">
+                    -
+                  </span>
+                @elseif($cell['status'] === 'hadir')
+                  <span class="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-100 text-sm font-black text-emerald-700">
+                    H
+                  </span>
+                  <div class="mt-1 text-[11px] font-semibold text-slate-400">
+                    {{ $cell['time'] }}
+                  </div>
+                @elseif($cell['status'] === 'terlambat')
+                  <span class="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-100 text-sm font-black text-amber-700">
+                    T
+                  </span>
+                  <div class="mt-1 text-[11px] font-semibold text-slate-400">
+                    {{ $cell['time'] }}
+                  </div>
                 @else
-                  @if($cell['status'] === 'hadir')
-                    <span class="badge bg-success-subtle text-success">H</span>
-                  @else
-                    <span class="badge bg-warning-subtle text-warning-emphasis">T</span>
-                  @endif
-                  <div class="text-muted" style="font-size:11px;">{{ $cell['time'] }}</div>
+                  <span class="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-100 text-sm font-black text-blue-700">
+                    {{ strtoupper(substr($cell['status'], 0, 1)) }}
+                  </span>
+                  <div class="mt-1 text-[11px] font-semibold text-slate-400">
+                    {{ $cell['time'] ?? '-' }}
+                  </div>
                 @endif
               </td>
             @endforeach
@@ -108,5 +141,6 @@
       </tbody>
     </table>
   </div>
-</div>
+</x-ui.card>
+
 @endsection

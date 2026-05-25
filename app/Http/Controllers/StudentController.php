@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -45,6 +46,7 @@ class StudentController extends Controller
             'name'      => ['required','string','max:120'],
             'kelas'     => ['nullable','string','max:50'],
             'kamar'     => ['nullable','string','max:50'],
+             'parent_phone' => ['nullable', 'string', 'max:30'],
             'is_active' => ['nullable','boolean'],
             'photo'     => ['nullable','image','mimes:jpg,jpeg,png','max:2048'],
         ]);
@@ -91,6 +93,7 @@ class StudentController extends Controller
             'kelas'     => ['nullable','string','max:50'],
             'kamar'     => ['nullable','string','max:50'],
             'is_active' => ['nullable','boolean'],
+             'parent_phone' => ['nullable', 'string', 'max:30'],
             'photo'     => ['nullable','image','mimes:jpg,jpeg,png','max:2048'],
         ]);
 
@@ -133,5 +136,41 @@ class StudentController extends Controller
         return redirect()
             ->route('students.index')
             ->with('success', 'Santri berhasil dihapus.');
+    }
+
+
+        public function searchRealtime(Request $request)
+    {
+        $q = $request->input('q');
+        $kelas = $request->input('kelas');
+        $kamar = $request->input('kamar');
+
+        $students = Student::query()
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($s) use ($q) {
+                    $s->where('name', 'like', "%{$q}%")
+                    ->orWhere('nis', 'like', "%{$q}%");
+                });
+            })
+            ->when($kelas, fn ($query) => $query->where('kelas', $kelas))
+            ->when($kamar, fn ($query) => $query->where('kamar', $kamar))
+            ->latest()
+            ->limit(30)
+            ->get()
+            ->map(fn ($student) => [
+                'id' => $student->id,
+                'name' => $student->name,
+                'nis' => $student->nis,
+                'kelas' => $student->kelas,
+                'kamar' => $student->kamar,
+                'is_active' => $student->is_active,
+                'photo_url' => $student->photoUrl(),
+                'show_url' => route('students.show', $student),
+                'edit_url' => route('students.edit', $student),
+            ]);
+
+        return response()->json([
+            'students' => $students,
+        ]);
     }
 }

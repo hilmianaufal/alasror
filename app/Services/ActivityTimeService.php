@@ -40,13 +40,19 @@ class ActivityTimeService
             ->first();
     }
 
-    public function isLate(Activity $activity): bool
-    {
-        $lateTime = Carbon::parse($activity->start_time)
-            ->addMinutes((int) $activity->late_minutes);
+        public function isLate($activity): bool
+        {
+            if ((int) $activity->late_minutes <= 0) {
+                return false;
+            }
 
-        return Carbon::now()->greaterThan($lateTime);
-    }
+            $now = now();
+
+            $start = \Carbon\Carbon::createFromTimeString($activity->start_time);
+            $lateLimit = $start->copy()->addMinutes((int) $activity->late_minutes);
+
+            return $now->greaterThan($lateLimit);
+        }
 
     public function getActivityStatus(Activity $activity): string
     {

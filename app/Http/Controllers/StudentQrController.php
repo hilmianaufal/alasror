@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 
@@ -66,4 +67,12 @@ class StudentQrController extends Controller
             ->header('Content-Type', 'image/jpeg')
             ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
+
+        public function idCard(\App\Models\Student $student)
+        {
+            $pdf = Pdf::loadView('students.id_card_pdf', compact('student'))
+                ->setPaper([0, 0, 260, 420], 'portrait');
+
+            return $pdf->download('ID-Card-'.$student->nis.'.pdf');
+        }
 }

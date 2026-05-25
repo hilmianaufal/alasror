@@ -1,83 +1,329 @@
 @extends('layouts.app')
+
 @section('title','Detail Santri')
+@section('mobile_title','Detail Santri')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-  <div>
-    <h4 class="fw-bold mb-0">{{ $student->name }}</h4>
-    <div class="text-muted">NIS: {{ $student->nis }}</div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{{ route('students.edit',$student) }}" class="btn btn-outline-secondary">Edit</a>
-    <a href="{{ route('students.index') }}" class="btn btn-light">Kembali</a>
-  </div>
-</div>
-<a class="btn btn-outline-primary btn-sm"
-   href="{{ route('students.attendance.show', $student) }}">
-  Absensi
-</a>
 
+<x-ui.page-header
+  title="{{ $student->name }}"
+  subtitle="NIS: {{ $student->nis }} • Detail identitas & QR santri"
+  icon="bi-person-badge"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('students.edit', $student)" variant="secondary">
+      <i class="bi bi-pencil"></i>
+      Edit
+    </x-ui.button>
 
-<div class="row g-3">
-  <div class="col-md-7">
-    <div class="card p-3">
-      <div class="mb-3">
-        <img src="{{ $student->photoUrl() }}"
-            class="rounded"
-            style="width:120px;height:120px;object-fit:cover;"
-            alt="{{ $student->name }}">
+    <x-ui.button :href="route('students.index')" variant="secondary">
+      Kembali
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
+
+<div class="grid gap-6 lg:grid-cols-12">
+
+  {{-- Profile Card --}}
+  <div class="lg:col-span-4">
+    <x-ui.card>
+
+      <div class="text-center">
+        <div class="mx-auto h-36 w-36 overflow-hidden rounded-[2rem] bg-emerald-50 shadow-xl shadow-emerald-100 ring-4 ring-white">
+          <img
+            src="{{ $student->photoUrl() }}"
+            alt="{{ $student->name }}"
+            class="h-full w-full object-cover">
+        </div>
+
+        <div class="mt-5 text-2xl font-black text-slate-900">
+          {{ $student->name }}
+        </div>
+
+        <div class="mt-1 text-sm font-bold text-slate-500">
+          {{ $student->nis }}
+        </div>
+
+        <div class="mt-4 flex justify-center gap-2">
+          @if($student->is_active)
+            <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+          @else
+            <x-ui.badge tone="red">Nonaktif</x-ui.badge>
+          @endif
+        </div>
       </div>
-      <div class="row g-2">
-        <div class="col-6">
-          <div class="text-muted small">Kelas</div>
-          <div class="fw-semibold">{{ $student->kelas ?? '-' }}</div>
-        </div>
-        <div class="col-6">
-          <div class="text-muted small">Kamar</div>
-          <div class="fw-semibold">{{ $student->kamar ?? '-' }}</div>
-        </div>
-        <div class="col-6">
-          <div class="text-muted small">Status</div>
-          <div class="fw-semibold">
-            @if($student->is_active)
-              <span class="badge bg-success-subtle text-success">Aktif</span>
-            @else
-              <span class="badge bg-secondary-subtle text-secondary">Nonaktif</span>
-            @endif
+
+      <div class="mt-8 grid grid-cols-2 gap-3">
+        <div class="rounded-2xl bg-blue-50 p-4 text-center">
+          <div class="text-xs font-black uppercase tracking-wide text-blue-400">
+            Kelas
+          </div>
+          <div class="mt-1 font-black text-blue-700">
+            {{ $student->kelas ?: '-' }}
           </div>
         </div>
-        <div class="col-12">
-          <div class="text-muted small">QR Token (isi QR permanen)</div>
-          <div class="fw-semibold font-monospace">{{ $student->qr_token }}</div>
-          <div class="text-muted small mt-2">
-            *Nanti QR image akan kita generate dari token ini.
+
+        <div class="rounded-2xl bg-emerald-50 p-4 text-center">
+          <div class="text-xs font-black uppercase tracking-wide text-emerald-400">
+            Kamar
           </div>
+          <div class="mt-1 font-black text-emerald-700">
+            {{ $student->kamar ?: '-' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-3">
+        <x-ui.button
+          :href="route('students.attendance.show', $student)"
+          class="w-full justify-center">
+          <i class="bi bi-calendar-check"></i>
+          Riwayat Absensi
+        </x-ui.button>
+
+        <x-ui.button
+          :href="route('students.edit', $student)"
+          variant="secondary"
+          class="w-full justify-center">
+          <i class="bi bi-pencil"></i>
+          Edit Data
+        </x-ui.button>
+      </div>
+
+    </x-ui.card>
+  </div>
+
+  {{-- QR Card --}}
+{{-- Premium ID Card --}}
+<div class="lg:col-span-4">
+  <x-ui.card>
+
+    <div class="mb-5 flex items-center justify-between">
+      <div>
+        <div class="text-lg font-black text-slate-900">
+          ID Card Santri
+        </div>
+        <div class="text-sm font-medium text-slate-500">
+          Kartu identitas digital
+        </div>
+      </div>
+
+      <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600">
+        <i class="bi bi-person-vcard"></i>
+      </div>
+    </div>
+
+    <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-700 via-emerald-500 to-lime-400 p-5 text-white shadow-2xl shadow-emerald-300/50">
+
+      {{-- Decorative glow --}}
+      <div class="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/20 blur-2xl"></div>
+      <div class="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-lime-300/30 blur-3xl"></div>
+
+      <div class="relative z-10">
+        {{-- Header --}}
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs font-black uppercase tracking-[0.25em] text-white/70">
+              Student ID
+            </div>
+            <div class="mt-1 text-lg font-black">
+              Pondok Digital
+            </div>
+          </div>
+
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur">
+            <i class="bi bi-stars text-xl"></i>
+          </div>
+        </div>
+
+        {{-- Photo --}}
+        <div class="mt-8 flex justify-center">
+          <div class="relative">
+            <div class="absolute inset-0 rounded-[2rem] bg-white/30 blur-xl"></div>
+
+            <img
+              src="{{ $student->photoUrl() }}"
+              alt="{{ $student->name }}"
+              class="relative h-32 w-32 rounded-[2rem] object-cover ring-4 ring-white/80 shadow-2xl">
+          </div>
+        </div>
+
+        {{-- Identity --}}
+        <div class="mt-5 text-center">
+          <div class="text-2xl font-black leading-tight">
+            {{ $student->name }}
+          </div>
+
+          <div class="mt-1 text-sm font-bold text-white/75">
+            NIS {{ $student->nis }}
+          </div>
+        </div>
+
+        {{-- Meta --}}
+        <div class="mt-6 grid grid-cols-2 gap-3">
+          <div class="rounded-2xl bg-white/18 p-3 text-center backdrop-blur">
+            <div class="text-[10px] font-black uppercase tracking-wide text-white/60">
+              Kelas
+            </div>
+            <div class="mt-1 text-sm font-black">
+              {{ $student->kelas ?: '-' }}
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white/18 p-3 text-center backdrop-blur">
+            <div class="text-[10px] font-black uppercase tracking-wide text-white/60">
+              Kamar
+            </div>
+            <div class="mt-1 text-sm font-black">
+              {{ $student->kamar ?: '-' }}
+            </div>
+          </div>
+        </div>
+
+        {{-- QR --}}
+        <div class="mt-6 rounded-[1.5rem] bg-white p-4 text-slate-900 shadow-xl">
+          <div class="flex items-center gap-4">
+            <img
+              src="{{ route('students.qr.show', $student) }}"
+              alt="QR {{ $student->nis }}"
+              class="h-24 w-24 rounded-xl object-contain">
+
+            <div class="min-w-0 flex-1">
+              <div class="text-xs font-black uppercase tracking-wide text-slate-400">
+                Scan QR
+              </div>
+
+              <div class="mt-1 text-sm font-black text-slate-900">
+                Absensi Santri
+              </div>
+
+              <div class="mt-2 break-all font-mono text-[10px] font-bold text-slate-400">
+                {{ Str::limit($student->qr_token, 32) }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{-- Footer --}}
+        <div class="mt-5 flex items-center justify-between text-xs font-bold text-white/70">
+          <span>Valid Permanent</span>
+          <span>{{ now()->format('Y') }}</span>
         </div>
       </div>
     </div>
-  </div>
 
-<div class="card p-3">
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <div class="fw-bold">Kartu QR</div>
-        <a href="{{ route('students.qr.download', $student) }}"
-        class="btn btn-outline-success btn-sm mt-2">
-        Download JPG
-        </a>
-  </div>
+    <div class="mt-5 grid grid-cols-2 gap-3">
+      <x-ui.button
+        :href="route('students.qr.download', $student)"
+        class="justify-center">
+        <i class="bi bi-download"></i>
+        QR
+      </x-ui.button>
+          @if($student->parent_phone)
+              @php
+                $today = now()->translatedFormat('d F Y');
+                $time = now()->format('H:i');
 
-  <div class="border rounded p-3 text-center bg-white">
-        <img src="{{ route('students.qr.show', $student) }}"
-         alt="QR {{ $student->nis }}"
-         style="width:240px">
-    <div class="mt-2 fw-semibold">{{ $student->name }}</div>
-    <div class="text-muted small">{{ $student->nis }}</div>
-  </div>
+                $waMessage = urlencode(
+                  "Assalamu'alaikum Bapak/Ibu.\n\n" .
 
-  <div class="text-muted small mt-2">
-    Isi QR: <span class="font-monospace">{{ $student->qr_token }}</span>
-  </div>
+                  "Kami informasikan bahwa ananda:\n\n" .
+
+                  "Nama: {$student->name}\n" .
+                  "NIS: {$student->nis}\n" .
+                  "Kelas: " . ($student->kelas ?? '-') . "\n\n" .
+
+                  "Telah melakukan absensi hari ini.\n\n" .
+
+                  "Tanggal: {$today}\n" .
+                  "Jam: {$time}\n\n" .
+
+                  "Terima kasih.\n" .
+                  "Pondok Pesantren Darussalam"
+                );
+
+                $waUrl = "https://wa.me/{$student->parent_phone}?text={$waMessage}";
+              @endphp
+
+            <x-ui.button
+              :href="$waUrl"
+              target="_blank"
+              class="w-full justify-center">
+              <i class="bi bi-whatsapp"></i>
+              Kirim WA Ortu
+            </x-ui.button>
+          @else
+            <div class="rounded-2xl bg-amber-50 p-4 text-sm font-bold text-amber-700">
+              Nomor WA ortu belum diisi.
+            </div>
+          @endif
+      <x-ui.button
+        :href="route('students.attendance.show', $student)"
+        variant="secondary"
+        class="justify-center">
+        Absensi
+      </x-ui.button>
+    </div>
+
+  </x-ui.card>
 </div>
 
+  {{-- Detail Info --}}
+  <div class="lg:col-span-4">
+    <x-ui.card>
+
+      <div class="mb-5">
+        <div class="text-lg font-black text-slate-900">
+          Informasi Detail
+        </div>
+        <div class="text-sm font-medium text-slate-500">
+          Data identitas santri
+        </div>
+      </div>
+
+      <div class="space-y-4">
+
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs font-black uppercase tracking-wide text-slate-400">
+            Nama
+          </div>
+          <div class="mt-1 font-black text-slate-900">
+            {{ $student->name }}
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs font-black uppercase tracking-wide text-slate-400">
+            NIS
+          </div>
+          <div class="mt-1 font-black text-slate-900">
+            {{ $student->nis }}
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs font-black uppercase tracking-wide text-slate-400">
+            QR Token
+          </div>
+          <div class="mt-2 break-all rounded-xl bg-white p-3 font-mono text-xs font-bold text-slate-600 ring-1 ring-slate-100">
+            {{ $student->qr_token }}
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-emerald-50 p-4">
+          <div class="text-xs font-black uppercase tracking-wide text-emerald-400">
+            Catatan
+          </div>
+          <div class="mt-1 text-sm font-semibold text-emerald-700">
+            QR token bersifat permanen dan digunakan untuk scan absensi.
+          </div>
+        </div>
+
+      </div>
+
+    </x-ui.card>
+  </div>
+
 </div>
+
 @endsection

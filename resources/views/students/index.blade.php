@@ -1,273 +1,369 @@
 @extends('layouts.app')
+
 @section('title','Data Santri')
+@section('mobile_title','Santri')
 
 @section('content')
-<style>
-  .student-hero {
-    background: linear-gradient(135deg, #0f766e, #16a34a);
-    border-radius: 22px;
-    padding: 18px;
-    color: #fff;
-    box-shadow: 0 12px 30px rgba(15, 118, 110, .25);
-  }
 
-  .student-filter {
-    border: 0;
-    border-radius: 18px;
-    box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
-  }
+<x-ui.page-header
+  title="Data Santri"
+  subtitle="Kelola data santri & QR code"
+  icon="bi-people"
+>
+  <x-slot:actions>
+    <x-ui.button :href="route('students.create')">
+      <i class="bi bi-plus-lg"></i>
+      Tambah
+    </x-ui.button>
+  </x-slot:actions>
+</x-ui.page-header>
 
-  .student-card {
-    border: 0;
-    border-radius: 20px;
-    box-shadow: 0 10px 26px rgba(15, 23, 42, .08);
-    overflow: hidden;
-  }
+<x-ui.card class="mb-6">
+  <form method="GET" id="studentFilterForm">
+    <div class="grid gap-4 md:grid-cols-4">
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Cari
+        </label>
+        <x-ui.input
+          id="studentSearchInput"
+          name="q"
+          :value="$q"
+          placeholder="Ketik nama / NIS..." />
+      </div>
 
-  .student-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #dcfce7, #ccfbf1);
-    color: #0f766e;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    flex: 0 0 auto;
-  }
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Kelas
+        </label>
+        <x-ui.input
+          id="studentKelasFilter"
+          name="kelas"
+          :value="$kelas"
+          placeholder="Contoh: 7A" />
+      </div>
 
-  .student-mobile-card {
-    border: 1px solid #eef2f7;
-    border-radius: 18px;
-    padding: 14px;
-    background: #fff;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, .06);
-  }
+      <div>
+        <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Kamar
+        </label>
+        <x-ui.input
+          id="studentKamarFilter"
+          name="kamar"
+          :value="$kamar"
+          placeholder="Contoh: Umar" />
+      </div>
 
-  .action-pill {
-    border-radius: 999px;
-    padding: 6px 10px;
-  }
+      <div class="flex items-end gap-2">
+        <x-ui.button type="submit" class="flex-1">
+          <i class="bi bi-search"></i>
+          Filter
+        </x-ui.button>
 
-  .soft-badge {
-    border-radius: 999px;
-    padding: 5px 9px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-
-  .student-pagination nav {
-  display: flex;
-  justify-content: center;
-}
-
-.student-pagination svg {
-  width: 16px !important;
-  height: 16px !important;
-}
-
-.student-pagination .pagination {
-  gap: 4px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.student-pagination .page-link {
-  border-radius: 10px;
-  min-width: 34px;
-  text-align: center;
-  font-size: 13px;
-}
-
-  @media (max-width: 767.98px) {
-    .desktop-table {
-      display: none;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .mobile-list {
-      display: none;
-    }
-  }
-</style>
-
-<div class="student-hero mb-3">
-  <div class="d-flex align-items-start justify-content-between gap-3">
-    <div>
-      <div class="small opacity-75 mb-1">Master Data</div>
-      <h4 class="fw-bold mb-1">Data Santri</h4>
-      <div class="small opacity-75">Kelola data santri dan QR token</div>
+        <x-ui.button :href="route('students.index')" variant="secondary">
+          Reset
+        </x-ui.button>
+      </div>
     </div>
+  </form>
+</x-ui.card>
 
-    <a href="{{ route('students.create') }}" class="btn btn-light btn-sm fw-semibold rounded-pill">
-      + Tambah
-    </a>
-  </div>
+{{-- Desktop Table --}}
+<div class="hidden lg:block">
+  <x-ui.card padding="p-0">
+    <div class="w-full overflow-x-auto">
+      <table class="w-full min-w-[720px]">
+        <thead class="border-b border-slate-100 bg-slate-50">
+          <tr class="text-left text-xs font-black uppercase tracking-wide text-slate-400">
+            <th class="px-6 py-4">Santri</th>
+            <th class="px-6 py-4">Kelas</th>
+            <th class="px-6 py-4">Kamar</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody id="studentDesktopRows" class="divide-y divide-slate-100">
+          @forelse($students as $student)
+            <tr class="transition hover:bg-emerald-50/40">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-4">
+                  <img
+                    src="{{ $student->photoUrl() }}"
+                    class="h-14 w-14 rounded-2xl object-cover ring-2 ring-white shadow"
+                    alt="{{ $student->name }}">
+
+                  <div class="min-w-0">
+                    <div class="truncate font-black text-slate-900">
+                      {{ $student->name }}
+                    </div>
+                    <div class="mt-1 text-sm font-semibold text-slate-500">
+                      {{ $student->nis }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4">
+                <x-ui.badge tone="blue">{{ $student->kelas ?: '-' }}</x-ui.badge>
+              </td>
+
+              <td class="px-6 py-4">
+                <x-ui.badge tone="emerald">{{ $student->kamar ?: '-' }}</x-ui.badge>
+              </td>
+
+              <td class="px-6 py-4">
+                @if($student->is_active)
+                  <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+                @else
+                  <x-ui.badge tone="red">Nonaktif</x-ui.badge>
+                @endif
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-2">
+                  <x-ui.button :href="route('students.show', $student)" variant="secondary">
+                    <i class="bi bi-eye"></i>
+                  </x-ui.button>
+
+                  <x-ui.button :href="route('students.edit', $student)" variant="secondary">
+                    <i class="bi bi-pencil"></i>
+                  </x-ui.button>
+                </div>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="5" class="p-8">
+                <x-ui.empty-state
+                  title="Belum ada santri"
+                  subtitle="Tambahkan data santri baru."
+                  icon="bi-people" />
+              </td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </x-ui.card>
 </div>
 
-<form class="card student-filter p-3 mb-3" method="GET" action="{{ route('students.index') }}">
-  <div class="row g-2">
-    <div class="col-12">
-      <input name="q" value="{{ $q }}" class="form-control form-control-sm rounded-pill"
-             placeholder="Cari NIS atau nama santri...">
+{{-- Mobile Card --}}
+<div id="studentMobileList" class="space-y-4 lg:hidden">
+  @forelse($students as $student)
+    <x-ui.card>
+      <div class="flex items-start gap-4">
+        <img
+          src="{{ $student->photoUrl() }}"
+          class="h-16 w-16 rounded-2xl object-cover shadow"
+          alt="{{ $student->name }}">
+
+        <div class="min-w-0 flex-1">
+          <div class="truncate text-base font-black text-slate-900">
+            {{ $student->name }}
+          </div>
+
+          <div class="mt-1 text-sm font-semibold text-slate-500">
+            {{ $student->nis }}
+          </div>
+
+          <div class="mt-3 flex flex-wrap gap-2">
+            <x-ui.badge tone="blue">{{ $student->kelas ?: '-' }}</x-ui.badge>
+            <x-ui.badge tone="emerald">{{ $student->kamar ?: '-' }}</x-ui.badge>
+
+            @if($student->is_active)
+              <x-ui.badge tone="emerald">Aktif</x-ui.badge>
+            @else
+              <x-ui.badge tone="red">Nonaktif</x-ui.badge>
+            @endif
+          </div>
+
+          <div class="mt-4 flex gap-2">
+            <x-ui.button
+              :href="route('students.show', $student)"
+              variant="secondary"
+              class="flex-1">
+              Detail
+            </x-ui.button>
+
+            <x-ui.button
+              :href="route('students.edit', $student)"
+              class="flex-1">
+              Edit
+            </x-ui.button>
+          </div>
+        </div>
+      </div>
+    </x-ui.card>
+  @empty
+    <x-ui.empty-state
+      title="Belum ada santri"
+      subtitle="Tambahkan data santri baru."
+      icon="bi-people" />
+  @endforelse
+</div>
+
+<div id="studentPagination">
+  @if($students->hasPages())
+    <div class="mt-6">
+      {{ $students->links() }}
     </div>
+  @endif
+</div>
 
-    <div class="col-6">
-      <select name="kelas" class="form-select form-select-sm rounded-pill">
-        <option value="">Semua Kelas</option>
-        @foreach($kelasList as $k)
-          <option value="{{ $k }}" @selected($kelas===$k)>{{ $k }}</option>
-        @endforeach
-      </select>
-    </div>
+@endsection
 
-    <div class="col-6">
-      <select name="kamar" class="form-select form-select-sm rounded-pill">
-        <option value="">Semua Kamar</option>
-        @foreach($kamarList as $km)
-          <option value="{{ $km }}" @selected($kamar===$km)>{{ $km }}</option>
-        @endforeach
-      </select>
-    </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('studentSearchInput');
+  const kelasFilter = document.getElementById('studentKelasFilter');
+  const kamarFilter = document.getElementById('studentKamarFilter');
+  const desktopRows = document.getElementById('studentDesktopRows');
+  const mobileList = document.getElementById('studentMobileList');
+  const pagination = document.getElementById('studentPagination');
 
-    <div class="col-8 d-grid">
-      <button class="btn btn-primary btn-sm rounded-pill fw-semibold">Filter</button>
-    </div>
+  let timer = null;
 
-    <div class="col-4 d-grid">
-      <a href="{{ route('students.index') }}" class="btn btn-light btn-sm rounded-pill">Reset</a>
-    </div>
-  </div>
-</form>
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
 
-{{-- Mobile Premium Card View --}}
-<div class="mobile-list">
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <div class="fw-semibold small">Daftar Santri</div>
-    <div class="text-muted small">{{ $students->total() }} data</div>
-  </div>
+  function badge(text, tone = 'emerald') {
+    const tones = {
+      emerald: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
+      blue: 'bg-blue-50 text-blue-700 ring-blue-100',
+      red: 'bg-red-50 text-red-700 ring-red-100',
+      slate: 'bg-slate-100 text-slate-600 ring-slate-200',
+    };
 
-  <div class="d-grid gap-2">
-    @forelse($students as $s)
-      <div class="student-mobile-card">
-        <div class="d-flex gap-3">
-        <img src="{{ $s->photoUrl() }}"
-            class="student-avatar"
-            style="object-fit:cover;"
-            alt="{{ $s->name }}">
+    return `<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-black ring-1 ${tones[tone] ?? tones.emerald}">${escapeHtml(text)}</span>`;
+  }
 
-          <div class="flex-grow-1 min-w-0">
-            <div class="d-flex justify-content-between gap-2">
-              <div>
-                <div class="fw-bold text-truncate">{{ $s->name }}</div>
-                <div class="text-muted small">NIS: {{ $s->nis }}</div>
-              </div>
+  function renderDesktop(students) {
+    if (!desktopRows) return;
 
-              @if($s->is_active)
-                <span class="soft-badge bg-success-subtle text-success">Aktif</span>
-              @else
-                <span class="soft-badge bg-secondary-subtle text-secondary">Nonaktif</span>
-              @endif
+    if (!students.length) {
+      desktopRows.innerHTML = `
+        <tr>
+          <td colspan="5" class="p-8 text-center text-sm font-bold text-slate-400">
+            Data santri tidak ditemukan.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    desktopRows.innerHTML = students.map(student => `
+      <tr class="transition hover:bg-emerald-50/40">
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-4">
+            <img src="${escapeHtml(student.photo_url)}" class="h-14 w-14 rounded-2xl object-cover ring-2 ring-white shadow">
+            <div class="min-w-0">
+              <div class="truncate font-black text-slate-900">${escapeHtml(student.name)}</div>
+              <div class="mt-1 text-sm font-semibold text-slate-500">${escapeHtml(student.nis)}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4">${badge(student.kelas ?? '-', 'blue')}</td>
+        <td class="px-6 py-4">${badge(student.kamar ?? '-', 'emerald')}</td>
+        <td class="px-6 py-4">${student.is_active ? badge('Aktif', 'emerald') : badge('Nonaktif', 'red')}</td>
+        <td class="px-6 py-4">
+          <div class="flex justify-end gap-2">
+            <a href="${escapeHtml(student.show_url)}" class="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-black transition active:scale-95 bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
+              <i class="bi bi-eye"></i>
+            </a>
+            <a href="${escapeHtml(student.edit_url)}" class="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-black transition active:scale-95 bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderMobile(students) {
+    if (!mobileList) return;
+
+    if (!students.length) {
+      mobileList.innerHTML = `
+        <div class="rounded-[1.75rem] border border-dashed border-emerald-200 bg-emerald-50/60 p-8 text-center text-sm font-bold text-slate-500">
+          Data santri tidak ditemukan.
+        </div>
+      `;
+      return;
+    }
+
+    mobileList.innerHTML = students.map(student => `
+      <div class="rounded-[1.75rem] border border-white/70 bg-white p-4 shadow-xl shadow-slate-200/70">
+        <div class="flex items-start gap-4">
+          <img src="${escapeHtml(student.photo_url)}" class="h-16 w-16 rounded-2xl object-cover shadow">
+          <div class="min-w-0 flex-1">
+            <div class="truncate text-base font-black text-slate-900">${escapeHtml(student.name)}</div>
+            <div class="mt-1 text-sm font-semibold text-slate-500">${escapeHtml(student.nis)}</div>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+              ${badge(student.kelas ?? '-', 'blue')}
+              ${badge(student.kamar ?? '-', 'emerald')}
+              ${student.is_active ? badge('Aktif', 'emerald') : badge('Nonaktif', 'red')}
             </div>
 
-            <div class="d-flex flex-wrap gap-1 mt-2">
-              <span class="soft-badge bg-light text-dark border">Kelas: {{ $s->kelas ?? '-' }}</span>
-              <span class="soft-badge bg-light text-dark border">Kamar: {{ $s->kamar ?? '-' }}</span>
-            </div>
-
-            <div class="d-flex gap-2 mt-3">
-              <a class="btn btn-outline-primary btn-sm action-pill flex-fill"
-                 href="{{ route('students.show',$s) }}">
+            <div class="mt-4 flex gap-2">
+              <a href="${escapeHtml(student.show_url)}" class="flex-1 inline-flex items-center justify-center rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-700 ring-1 ring-slate-200">
                 Detail
               </a>
-
-              <a class="btn btn-outline-secondary btn-sm action-pill flex-fill"
-                 href="{{ route('students.edit',$s) }}">
+              <a href="${escapeHtml(student.edit_url)}" class="flex-1 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-500 px-4 py-2 text-sm font-black text-white">
                 Edit
               </a>
-
-              <form method="POST" action="{{ route('students.destroy',$s) }}"
-                    onsubmit="return confirm('Hapus santri ini?')" class="flex-fill">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-outline-danger btn-sm action-pill w-100">
-                  Hapus
-                </button>
-              </form>
             </div>
           </div>
         </div>
       </div>
-    @empty
-      <div class="student-mobile-card text-center text-muted py-4">
-        Belum ada data santri.
-      </div>
-    @endforelse
-  </div>
-</div>
+    `).join('');
+  }
 
-{{-- Desktop Table View --}}
-<div class="card student-card desktop-table">
-  <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0 table-sm small">
-      <thead class="table-light">
-        <tr>
-          <th style="width:110px;">NIS</th>
-          <th>Nama</th>
-          <th style="width:90px;">Kelas</th>
-          <th style="width:110px;">Kamar</th>
-          <th style="width:90px;">Status</th>
-          <th class="text-center" style="width:160px;">Aksi</th>
-        </tr>
-      </thead>
+  async function searchStudents() {
+    const params = new URLSearchParams({
+      q: searchInput?.value ?? '',
+      kelas: kelasFilter?.value ?? '',
+      kamar: kamarFilter?.value ?? '',
+    });
 
-      <tbody>
-        @forelse($students as $s)
-          <tr>
-            <td class="fw-semibold">{{ $s->nis }}</td>
-            <td>
-              <div class="d-flex align-items-center gap-2">
-                <div class="student-avatar" style="width:34px;height:34px;border-radius:12px;">
-                  {{ strtoupper(substr($s->name, 0, 1)) }}
-                </div>
-                <div class="fw-semibold">{{ $s->name }}</div>
-              </div>
-            </td>
-            <td>{{ $s->kelas ?? '-' }}</td>
-            <td>{{ $s->kamar ?? '-' }}</td>
-            <td>
-              @if($s->is_active)
-                <span class="soft-badge bg-success-subtle text-success">Aktif</span>
-              @else
-                <span class="soft-badge bg-secondary-subtle text-secondary">Nonaktif</span>
-              @endif
-            </td>
-            <td class="text-center">
-              <div class="btn-group btn-group-sm">
-                <a class="btn btn-outline-primary" href="{{ route('students.show',$s) }}">👁</a>
-                <a class="btn btn-outline-secondary" href="{{ route('students.edit',$s) }}">✏️</a>
-                <form method="POST" action="{{ route('students.destroy',$s) }}"
-                      onsubmit="return confirm('Hapus santri ini?')" class="d-inline">
-                  @csrf
-                  @method('DELETE')
-                  <button class="btn btn-outline-danger">🗑</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="6" class="text-center text-muted py-4">Belum ada data.</td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
-</div>
+    try {
+      const res = await fetch(`{{ route('students.search.realtime') }}?${params.toString()}`, {
+        headers: { 'Accept': 'application/json' }
+      });
 
-<div class="student-pagination mt-3 mb-5">
-  {{ $students->links('pagination::bootstrap-5') }}
-</div>
-@endsection
+      if (!res.ok) throw new Error('Request gagal');
+
+      const json = await res.json();
+
+      renderDesktop(json.students ?? []);
+      renderMobile(json.students ?? []);
+
+      if (pagination) {
+        pagination.style.display = (params.get('q') || params.get('kelas') || params.get('kamar'))
+          ? 'none'
+          : '';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function debounceSearch() {
+    clearTimeout(timer);
+    timer = setTimeout(searchStudents, 300);
+  }
+
+  searchInput?.addEventListener('input', debounceSearch);
+  kelasFilter?.addEventListener('input', debounceSearch);
+  kamarFilter?.addEventListener('input', debounceSearch);
+});
+</script>
+@endpush

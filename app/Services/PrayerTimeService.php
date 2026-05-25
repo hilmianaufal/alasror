@@ -41,16 +41,18 @@ class PrayerTimeService
     /**
      * Cek terlambat: sekarang > start_time + late_minutes
      */
-    public function isLate(Prayer $prayer, ?Carbon $now = null): bool
+    public function isLate($prayer): bool
     {
-        $now = $now ?: now();
+        if ((int) $prayer->late_minutes <= 0) {
+            return false;
+        }
 
-        $start = Carbon::createFromFormat('H:i:s', $prayer->start_time);
-        $limit = $start->copy()->addMinutes($prayer->late_minutes);
+        $now = now();
 
-        $current = Carbon::createFromFormat('H:i:s', $now->format('H:i:s'));
+        $start = \Carbon\Carbon::createFromTimeString($prayer->start_time);
+        $lateLimit = $start->copy()->addMinutes((int) $prayer->late_minutes);
 
-        return $current->greaterThan($limit);
+        return $now->greaterThan($lateLimit);
     }
 
 }
