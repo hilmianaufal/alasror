@@ -112,7 +112,34 @@
   <x-ui.stat-card label="Sakit" :value="$sakitCount" icon="bi-heart-pulse" tone="red" />
   <x-ui.stat-card label="Alpa" :value="$belumCount" icon="bi-x-circle" tone="red" />
 </div>
+<div class="mb-6">
+  <x-ui.card>
+    <div class="mb-5 flex items-center justify-between gap-3">
+      <div>
+        <div class="text-lg font-black text-slate-900">
+          Diagram Statistik Kegiatan
+        </div>
+        <div class="text-sm font-medium text-slate-500">
+          Komposisi status {{ $selectedActivity?->name ?? '-' }}
+        </div>
+      </div>
 
+      <button
+        type="button"
+        id="downloadActivityChart"
+        class="rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 hover:bg-emerald-100">
+        <i class="bi bi-download"></i>
+        Download
+      </button>
+    </div>
+
+    <div class="mx-auto flex justify-center">
+      <div class="h-[220px] w-[220px]">
+        <canvas id="activityRecapChart"></canvas>
+      </div>
+    </div>
+  </x-ui.card>
+</div>
 <div class="grid gap-6 lg:grid-cols-12">
 
   <div class="lg:col-span-8">
@@ -335,3 +362,62 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chartEl = document.getElementById('activityRecapChart');
+  const downloadBtn = document.getElementById('downloadActivityChart');
+
+  if (!chartEl || typeof Chart === 'undefined') return;
+
+  const chart = new Chart(chartEl, {
+    type: 'doughnut',
+    data: {
+      labels: ['Hadir', 'Telat', 'Izin', 'Sakit', 'Alpa'],
+      datasets: [{
+        data: [
+          {{ (int) $hadirCount }},
+          {{ (int) $terlambatCount }},
+          {{ (int) $izinCount }},
+          {{ (int) $sakitCount }},
+          {{ (int) $belumCount }}
+        ],
+        backgroundColor: [
+          '#10b981',
+          '#f59e0b',
+          '#3b82f6',
+          '#ef4444',
+          '#dc2626'
+        ],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            font: {
+              weight: 'bold'
+            }
+          }
+        }
+      }
+    }
+  });
+
+  downloadBtn?.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'diagram-rekap-kegiatan.png';
+    link.href = chart.toBase64Image('image/png', 1);
+    link.click();
+  });
+});
+</script>
+@endpush

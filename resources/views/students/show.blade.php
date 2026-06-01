@@ -113,7 +113,9 @@
       </div>
     </div>
 
-    <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-700 via-emerald-500 to-lime-400 p-5 text-white shadow-2xl shadow-emerald-300/50">
+   <div
+  id="studentIdCard"
+  class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-700 via-emerald-500 to-lime-400 p-5 text-white shadow-2xl shadow-emerald-300/50">
 
       {{-- Decorative glow --}}
       <div class="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/20 blur-2xl"></div>
@@ -213,12 +215,12 @@
     </div>
 
     <div class="mt-5 grid grid-cols-2 gap-3">
-      <x-ui.button
-        :href="route('students.qr.download', $student)"
-        class="justify-center">
-        <i class="bi bi-download"></i>
-        QR
-      </x-ui.button>
+    <a
+      href="{{ route('students.id-card.png', $student) }}"
+      class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-500 px-4 py-2 text-sm font-black text-white shadow-lg shadow-emerald-300/40 transition active:scale-95">
+      <i class="bi bi-download"></i>
+      Download ID Card
+    </a>
           @if($student->parent_phone)
               @php
                 $today = now()->translatedFormat('d F Y');
@@ -325,5 +327,6 @@
   </div>
 
 </div>
+
 
 @endsection

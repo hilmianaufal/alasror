@@ -186,8 +186,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/rekap-mingguan/export/excel', [WeeklyRecapController::class, 'exportExcel'])
     ->name('rekap.weekly.export.excel');
-
-
+    Route::get('/students/{student}/id-card/png', [StudentQrController::class, 'idCardPng'])
+        ->name('students.id-card.png');
 
     /*
     |--------------------------------------------------------------------------

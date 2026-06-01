@@ -42,6 +42,8 @@
   </div>
 @endif
 <x-ui.card class="mb-6">
+
+
   <form method="GET">
     <div class="grid gap-4 lg:grid-cols-5">
 
@@ -158,7 +160,34 @@
     tone="red" />
 
 </div>
+<div class="mb-6">
+  <x-ui.card>
+    <div class="mb-5 flex items-center justify-between gap-3">
+      <div>
+        <div class="text-lg font-black text-slate-900">
+          Diagram Statistik Harian
+        </div>
+        <div class="text-sm font-medium text-slate-500">
+          Komposisi status absensi {{ $selectedPrayer?->name ?? '-' }}
+        </div>
+      </div>
 
+      <button
+        type="button"
+        id="downloadChart"
+        class="rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 hover:bg-emerald-100">
+        <i class="bi bi-download"></i>
+        Download
+      </button>
+    </div>
+
+    <div class="mx-auto flex justify-center">
+        <div class="h-[220px] w-[220px]">
+            <canvas id="dailyRecapChart"></canvas>
+        </div>
+    </div>
+  </x-ui.card>
+</div>
 <div class="grid gap-6 lg:grid-cols-12">
 
   {{-- SUDAH ABSEN --}}
@@ -442,3 +471,63 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chartEl = document.getElementById('dailyRecapChart');
+  const downloadBtn = document.getElementById('downloadChart');
+
+  if (!chartEl || typeof Chart === 'undefined') return;
+
+  const chart = new Chart(chartEl, {
+    type: 'doughnut',
+    data: {
+      labels: ['Hadir', 'Telat', 'Udzur', 'Sakit', 'Pulang', 'Alpa'],
+      datasets: [{
+        data: [
+          {{ (int) $hadirCount }},
+          {{ (int) $terlambatCount }},
+          {{ (int) $udzurCount }},
+          {{ (int) $sakitCount }},
+          {{ (int) $pulangCount }},
+          {{ (int) $belumCount }}
+        ],
+        backgroundColor: [
+          '#10b981',
+          '#f59e0b',
+          '#3b82f6',
+          '#ef4444',
+          '#64748b',
+          '#dc2626'
+        ],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '68%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            font: {
+              weight: 'bold'
+            }
+          }
+        }
+      }
+    }
+  });
+
+  downloadBtn?.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'diagram-rekap-harian.png';
+    link.href = chart.toBase64Image('image/png', 1);
+    link.click();
+  });
+});
+</script>
+@endpush
