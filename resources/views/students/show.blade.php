@@ -221,6 +221,12 @@
       <i class="bi bi-download"></i>
       Download ID Card
     </a>
+    <a
+      href="{{ route('students.qr.download', $student) }}"
+      class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-black text-white shadow-lg shadow-slate-300/40 transition active:scale-95">
+      <i class="bi bi-qr-code"></i>
+      Download QR
+    </a>
           @if($student->parent_phone)
               @php
                 $today = now()->translatedFormat('d F Y');
