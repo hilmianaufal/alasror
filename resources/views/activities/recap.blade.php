@@ -271,10 +271,18 @@
           {{ $absentStudents->count() }} santri
         </div>
       </div>
-
+          <div class="mt-4">
+            <input
+              type="text"
+              id="searchActivityAbsentStudent"
+              placeholder="Cari santri belum absen..."
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100">
+          </div>
       <div class="max-h-[720px] overflow-y-auto">
         @forelse($absentStudents as $student)
-          <div class="border-b border-slate-100 p-4">
+            <div
+            class="activity-absent-student-item border-b border-slate-100 p-4"
+            data-search="{{ strtolower($student->name.' '.$student->nis.' '.$student->kelas.' '.$student->kamar) }}">
             <div class="flex items-start gap-4">
               <img
                 src="{{ $student->photoUrl() }}"
@@ -424,6 +432,19 @@ document.addEventListener('DOMContentLoaded', () => {
     link.download = 'diagram-rekap-kegiatan.png';
     link.href = chart.toBase64Image('image/png', 1);
     link.click();
+  });
+});
+
+
+const searchActivityAbsentInput = document.getElementById('searchActivityAbsentStudent');
+const activityAbsentItems = document.querySelectorAll('.activity-absent-student-item');
+
+searchActivityAbsentInput?.addEventListener('input', () => {
+  const keyword = searchActivityAbsentInput.value.toLowerCase().trim();
+
+  activityAbsentItems.forEach((item) => {
+    const text = item.dataset.search || '';
+    item.style.display = text.includes(keyword) ? '' : 'none';
   });
 });
 </script>

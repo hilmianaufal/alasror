@@ -356,7 +356,13 @@
         <div class="text-lg font-black text-slate-900">
           Alpa / Belum Absen
         </div>
-
+          <div class="mt-4">
+            <input
+              type="text"
+              id="searchAbsentStudent"
+              placeholder="Cari santri belum absen..."
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100">
+          </div>
         <div class="text-sm text-slate-500">
           {{ $absentStudents->count() }} santri
         </div>
@@ -366,7 +372,9 @@
 
         @forelse($absentStudents as $student)
 
-          <div class="border-b border-slate-100 p-4">
+            <div
+              class="absent-student-item border-b border-slate-100 p-4"
+              data-search="{{ strtolower($student->name.' '.$student->nis.' '.$student->kelas.' '.$student->kamar) }}">
 
             <div class="flex items-start gap-4">
 
@@ -535,4 +543,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('searchAbsentStudent');
+  const items = document.querySelectorAll('.absent-student-item');
+
+  input?.addEventListener('input', () => {
+    const keyword = input.value.toLowerCase().trim();
+
+    items.forEach((item) => {
+      const text = item.dataset.search || '';
+      item.style.display = text.includes(keyword) ? '' : 'none';
+    });
+  });
+});
+</script>
+@endpush
 @endpush

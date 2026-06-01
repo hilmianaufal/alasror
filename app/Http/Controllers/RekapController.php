@@ -131,48 +131,77 @@ class RekapController extends Controller
     }
 
     public function exportPdf(Request $request, PrayerTimeService $prayerService)
-    {
-        $date = $request->input('date', now()->toDateString());
-        $kelas = $request->input('kelas');
-        $kamar = $request->input('kamar');
+{
+    $date = $request->input('date', now()->toDateString());
+    $kelas = $request->input('kelas');
+    $kamar = $request->input('kamar');
 
-        $prayers = \App\Models\Prayer::where('is_active', true)->orderBy('order')->get();
-        $defaultPrayer = $prayerService->getActivePrayer() ?: $prayers->first();
-        $prayerId = (int)($request->input('prayer_id', $defaultPrayer?->id));
-        $selectedPrayer = $prayers->firstWhere('id', $prayerId) ?: $defaultPrayer;
+    $prayers = Prayer::where('is_active', true)->orderBy('order')->get();
+    $defaultPrayer = $prayerService->getActivePrayer() ?: $prayers->first();
 
-        if (!$selectedPrayer) abort(404, 'Sholat tidak ditemukan.');
+    $prayerId = (int) ($request->input('prayer_id', $defaultPrayer?->id));
+    $selectedPrayer = $prayers->firstWhere('id', $prayerId) ?: $defaultPrayer;
 
-        // Ambil session + data sama seperti rekap
-        $session = \App\Models\AttendanceSession::firstOrCreate(
-            ['date' => $date, 'prayer_id' => $selectedPrayer->id],
-            ['status' => 'live']
-        );
-
-        $attendances = \App\Models\Attendance::with('student')
-            ->where('attendance_session_id', $session->id)
-            ->when($kelas, fn($q) => $q->whereHas('student', fn($s) => $s->where('kelas', $kelas)))
-            ->when($kamar, fn($q) => $q->whereHas('student', fn($s) => $s->where('kamar', $kamar)))
-            ->orderBy('scanned_at')
-            ->get();
-
-        $totalStudents = \App\Models\Student::where('is_active', true)
-            ->when($kelas, fn($q) => $q->where('kelas', $kelas))
-            ->when($kamar, fn($q) => $q->where('kamar', $kamar))
-            ->count();
-
-        $hadirCount = $attendances->where('status','hadir')->count();
-        $terlambatCount = $attendances->where('status','terlambat')->count();
-        $belumCount = max(0, $totalStudents - ($hadirCount + $terlambatCount));
-
-        $pdf = Pdf::loadView('rekap.pdf', compact(
-            'date','kelas','kamar','selectedPrayer',
-            'attendances','totalStudents','hadirCount','terlambatCount','belumCount'
-        ))->setPaper('A4', 'portrait');
-
-        $filename = 'Rekap-'.$selectedPrayer->name.'-'.$date.'.pdf';
-        return $pdf->download($filename);
+    if (!$selectedPrayer) {
+        abort(404, 'Sholat tidak ditemukan.');
     }
+
+    $session = AttendanceSession::firstOrCreate(
+        [
+            'date' => $date,
+            'prayer_id' => $selectedPrayer->id,
+        ],
+        [
+            'status' => 'live',
+        ]
+    );
+
+    $students = Student::where('is_active', true)
+        ->when($kelas, fn ($q) => $q->where('kelas', $kelas))
+        ->when($kamar, fn ($q) => $q->where('kamar', $kamar))
+        ->orderBy('name')
+        ->get();
+
+    $attendances = Attendance::with('student')
+        ->where('attendance_session_id', $session->id)
+        ->when($kelas, fn ($q) => $q->whereHas('student', fn ($s) => $s->where('kelas', $kelas)))
+        ->when($kamar, fn ($q) => $q->whereHas('student', fn ($s) => $s->where('kamar', $kamar)))
+        ->get();
+
+    $attendancesByStudent = $attendances->keyBy('student_id');
+
+    $totalStudents = $students->count();
+
+    $hadirCount = $attendances->where('status', 'hadir')->count();
+    $terlambatCount = $attendances->where('status', 'terlambat')->count();
+    $udzurCount = $attendances->where('status', 'udzur')->count();
+    $sakitCount = $attendances->where('status', 'sakit')->count();
+    $pulangCount = $attendances->where('status', 'pulang')->count();
+
+    $sudahCount = $hadirCount + $terlambatCount + $udzurCount + $sakitCount + $pulangCount;
+    $belumCount = max(0, $totalStudents - $sudahCount);
+
+    $pdf = Pdf::loadView('rekap.pdf', compact(
+        'date',
+        'kelas',
+        'kamar',
+        'selectedPrayer',
+        'students',
+        'attendances',
+        'attendancesByStudent',
+        'totalStudents',
+        'hadirCount',
+        'terlambatCount',
+        'udzurCount',
+        'sakitCount',
+        'pulangCount',
+        'belumCount'
+    ))->setPaper('A4', 'portrait');
+
+    $filename = 'Rekap-' . $selectedPrayer->name . '-' . $date . '.pdf';
+
+    return $pdf->download($filename);
+}
 
 
         public function markStatus(Request $request)
