@@ -400,51 +400,56 @@
 
                 </div>
 
-                <div class="mt-4 grid grid-cols-3 gap-2">
+                <div class="mt-4 overflow-x-auto">
+                <div class="flex gap-2 min-w-max pb-1">
 
-                  <form method="POST" action="{{ route('rekap.mark-status') }}">
-                    @csrf
-                    <input type="hidden" name="student_id" value="{{ $student->id }}">
-                    <input type="hidden" name="prayer_id" value="{{ $selectedPrayer?->id }}">
-                    <input type="hidden" name="date" value="{{ $date }}">
-                    <input type="hidden" name="status" value="udzur">
+                    {{-- Tombol Udzur --}}
+                    <form method="POST" action="{{ route('rekap.mark-status') }}">
+                        @csrf
+                        <input type="hidden" name="student_id" value="{{ $student->id }}">
+                        <input type="hidden" name="prayer_id" value="{{ $selectedPrayer?->id }}">
+                        <input type="hidden" name="date" value="{{ $date }}">
+                        <input type="hidden" name="status" value="udzur">
 
-                    <button
-                      type="submit"
-                      class="w-full rounded-xl bg-blue-50 px-3 py-2 text-xs font-black text-blue-600 transition hover:bg-blue-100">
-                      Udzur
-                    </button>
-                  </form>
+                        <button
+                            type="submit"
+                            class="w-28 rounded-2xl bg-blue-50 px-3 py-2 text-xs font-black text-blue-700">
+                            Udzur
+                        </button>
+                    </form>
 
-                  <form method="POST" action="{{ route('rekap.mark-status') }}">
-                    @csrf
-                    <input type="hidden" name="student_id" value="{{ $student->id }}">
-                    <input type="hidden" name="prayer_id" value="{{ $selectedPrayer?->id }}">
-                    <input type="hidden" name="date" value="{{ $date }}">
-                    <input type="hidden" name="status" value="sakit">
+                    {{-- Sakit --}}
+                    <form method="POST" action="{{ route('rekap.mark-status') }}">
+                        @csrf
+                        <input type="hidden" name="student_id" value="{{ $student->id }}">
+                        <input type="hidden" name="prayer_id" value="{{ $selectedPrayer?->id }}">
+                        <input type="hidden" name="date" value="{{ $date }}">
+                        <input type="hidden" name="status" value="sakit">
 
-                    <button
-                      type="submit"
-                      class="w-full rounded-xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 transition hover:bg-amber-100">
-                      Sakit
-                    </button>
-                  </form>
+                        <button
+                            type="submit"
+                            class="w-28 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-black text-amber-700">
+                            Sakit
+                        </button>
+                    </form>
 
-                  <form method="POST" action="{{ route('rekap.mark-status') }}">
-                    @csrf
-                    <input type="hidden" name="student_id" value="{{ $student->id }}">
-                    <input type="hidden" name="prayer_id" value="{{ $selectedPrayer?->id }}">
-                    <input type="hidden" name="date" value="{{ $date }}">
-                    <input type="hidden" name="status" value="pulang">
+                    {{-- Pulang --}}
+                    <form method="POST" action="{{ route('rekap.mark-status') }}">
+                        @csrf
+                        <input type="hidden" name="student_id" value="{{ $student->id }}">
+                        <input type="hidden" name="prayer_id" value="{{ $selectedPrayer?->id }}">
+                        <input type="hidden" name="date" value="{{ $date }}">
+                        <input type="hidden" name="status" value="pulang">
 
-                    <button
-                      type="submit"
-                      class="w-full rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-200">
-                      Pulang
-                    </button>
-                  </form>
+                        <button
+                            type="submit"
+                            class="w-28 rounded-2xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-700">
+                            Pulang
+                        </button>
+                    </form>
 
                 </div>
+            </div>
               </div>
 
             </div>

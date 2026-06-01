@@ -300,48 +300,55 @@
                   </x-ui.badge>
                 </div>
 
-                <div class="mt-4 grid grid-cols-3 gap-2">
-                  <form method="POST" action="{{ route('activities.recap.mark-status') }}">
-                    @csrf
-                    <input type="hidden" name="activity_id" value="{{ $selectedActivity?->id }}">
-                    <input type="hidden" name="student_id" value="{{ $student->id }}">
-                    <input type="hidden" name="date" value="{{ $date }}">
-                    <input type="hidden" name="status" value="izin">
+                <div class="mt-4 overflow-x-auto scrollbar-hide">
+                    <div class="flex min-w-max gap-2 pb-1">
 
-                    <button
-                      type="submit"
-                      class="w-full rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-600 transition hover:bg-blue-100">
-                      Izin
-                    </button>
-                  </form>
+                        {{-- Izin --}}
+                        <form method="POST" action="{{ route('activities.recap.mark-status') }}">
+                            @csrf
+                            <input type="hidden" name="activity_id" value="{{ $selectedActivity?->id }}">
+                            <input type="hidden" name="student_id" value="{{ $student->id }}">
+                            <input type="hidden" name="date" value="{{ $date }}">
+                            <input type="hidden" name="status" value="izin">
 
-                  <form method="POST" action="{{ route('activities.recap.mark-status') }}">
-                    @csrf
-                    <input type="hidden" name="activity_id" value="{{ $selectedActivity?->id }}">
-                    <input type="hidden" name="student_id" value="{{ $student->id }}">
-                    <input type="hidden" name="date" value="{{ $date }}">
-                    <input type="hidden" name="status" value="sakit">
+                            <button
+                                type="submit"
+                                class="w-28 rounded-2xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-600 transition hover:bg-blue-100">
+                                Izin
+                            </button>
+                        </form>
 
-                    <button
-                      type="submit"
-                      class="w-full rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 transition hover:bg-amber-100">
-                      Sakit
-                    </button>
-                  </form>
+                        {{-- Sakit --}}
+                        <form method="POST" action="{{ route('activities.recap.mark-status') }}">
+                            @csrf
+                            <input type="hidden" name="activity_id" value="{{ $selectedActivity?->id }}">
+                            <input type="hidden" name="student_id" value="{{ $student->id }}">
+                            <input type="hidden" name="date" value="{{ $date }}">
+                            <input type="hidden" name="status" value="sakit">
 
-                  <form method="POST" action="{{ route('activities.recap.mark-status') }}">
-                    @csrf
-                    <input type="hidden" name="activity_id" value="{{ $selectedActivity?->id }}">
-                    <input type="hidden" name="student_id" value="{{ $student->id }}">
-                    <input type="hidden" name="date" value="{{ $date }}">
-                    <input type="hidden" name="status" value="pulang">
+                            <button
+                                type="submit"
+                                class="w-28 rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 transition hover:bg-amber-100">
+                                Sakit
+                            </button>
+                        </form>
 
-                    <button
-                      type="submit"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-200">
-                      Pulang
-                    </button>
-                  </form>
+                        {{-- Pulang --}}
+                        <form method="POST" action="{{ route('activities.recap.mark-status') }}">
+                            @csrf
+                            <input type="hidden" name="activity_id" value="{{ $selectedActivity?->id }}">
+                            <input type="hidden" name="student_id" value="{{ $student->id }}">
+                            <input type="hidden" name="date" value="{{ $date }}">
+                            <input type="hidden" name="status" value="pulang">
+
+                            <button
+                                type="submit"
+                                class="w-28 rounded-2xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-200">
+                                Pulang
+                            </button>
+                        </form>
+
+                    </div>
                 </div>
               </div>
             </div>

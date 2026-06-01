@@ -69,6 +69,26 @@
       </div>
       <div class="mt-2 text-xs font-black text-slate-700">Bulanan</div>
     </a>
+
+    <a href="{{ route('rekap.weekly') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+  <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-xl text-purple-600 group-hover:bg-purple-500 group-hover:text-white">
+    <i class="bi bi-calendar-week"></i>
+  </div>
+  <div class="mt-2 text-xs font-black text-slate-700">Mingguan</div>
+</a>
+
+<a href="{{ route('activities.recap') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+  <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-xl text-teal-600 group-hover:bg-teal-500 group-hover:text-white">
+    <i class="bi bi-clipboard-check"></i>
+  </div>
+  <div class="mt-2 text-xs font-black text-slate-700">Rekap Kegiatan</div>
+</a>
+<a href="{{ route('students.import.form') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+  <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-xl text-green-600 group-hover:bg-green-500 group-hover:text-white">
+    <i class="bi bi-file-earmark-spreadsheet"></i>
+  </div>
+  <div class="mt-2 text-xs font-black text-slate-700">Import</div>
+</a>
   @endcan
 
   @can('manage_prayers')
