@@ -162,7 +162,7 @@
 
   <div class="meta">
     <div class="meta-box">
-      <div class="meta-label">Kelas</div>
+      <div class="meta-label">Jenjang</div>
       <div class="meta-value">{{ $student->kelas ?: '-' }}</div>
     </div>
 

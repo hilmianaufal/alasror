@@ -4,7 +4,7 @@
   <div class="flex h-24 items-center gap-3 px-6">
       <div class="flex h-[52px] w-[52px] items-center justify-center overflow-hidden rounded-[1.4rem] bg-white shadow-xl shadow-emerald-300/40 ring-2 ring-emerald-100">
           <img
-              src="{{ asset('images/logo.png.png') }}"
+              src="{{ asset('images/logo.png.PNG') }}"
               alt="Logo"
               class="h-10 w-10 object-contain">
       </div>
@@ -53,40 +53,47 @@
           'permission' => 'manage_students',
         ],
         [
-          'label' => 'Rekap Harian',
-          'route' => 'rekap.index',
-          'active' => 'rekap.index',
-          'icon' => 'bi-clipboard-data',
-          'permission' => 'view_reports',
-        ],
-        [
-          'label' => 'Rekap Bulanan',
-          'route' => 'rekap.monthly',
-          'active' => 'rekap.monthly',
-          'icon' => 'bi-calendar3',
-          'permission' => 'view_reports',
-        ],
-        [
           'label' => 'Jadwal Sholat',
           'route' => 'prayers.index',
           'active' => 'prayers.*',
           'icon' => 'bi-clock-history',
           'permission' => 'manage_prayers',
-        ],
-        [
-          'label' => 'Kegiatan',
-          'route' => 'activities.index',
-          'active' => 'activities.index',
-          'icon' => 'bi-calendar-check',
-          'permission' => 'manage_prayers',
-        ],
+          ],
+          [
+            'label' => 'Kegiatan',
+            'route' => 'activities.index',
+            'active' => 'activities.*',
+            'icon' => 'bi-calendar-check',
+            'permission' => 'manage_activities',
+            ],
+            [
+              'label' => 'Rekap Harian',
+              'route' => 'rekap.index',
+              'active' => 'rekap.index',
+              'icon' => 'bi-clipboard-data',
+              'permission' => 'view_reports',
+            ],
+            [
+              'label' => 'Rekap Bulanan',
+              'route' => 'rekap.monthly',
+              'active' => 'rekap.monthly',
+              'icon' => 'bi-calendar3',
+              'permission' => 'view_reports',
+            ],
+            [
+              'label' => 'Rekap Mingguan',
+              'route' => 'rekap.weekly',
+              'active' => 'rekap.weekly',
+              'icon' => 'bi-calendar-week',
+              'permission' => 'view_reports',
+            ],
         [
           'label' => 'Rekap Kegiatan',
           'route' => 'activities.recap',
           'active' => 'activities.recap',
           'icon' => 'bi-clipboard-check',
           'permission' => 'view_reports',
-        ],
+          ],
         [
           'label' => 'Users',
           'route' => 'users.index',
@@ -131,6 +138,9 @@
         <div class="min-w-0 flex-1">
           <div class="truncate text-sm font-black text-emerald-950">
             {{ auth()->user()->name }}
+          </div>
+          <div class="truncate text-xs font-bold text-emerald-600">
+              {{ auth()->user()->roles->first()?->name ?? 'User' }}
           </div>
           <div class="truncate text-xs text-slate-500">
             {{ auth()->user()->email }}

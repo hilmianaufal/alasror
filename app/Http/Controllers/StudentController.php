@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\StudentsImport;
 use App\Models\Student;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
@@ -172,5 +176,65 @@ class StudentController extends Controller
         return response()->json([
             'students' => $students,
         ]);
+    }
+
+    public function importForm()
+    {
+        return view('students.import');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+        ]);
+
+        $import = new StudentsImport();
+
+        Excel::import($import, $request->file('file'));
+
+        return redirect()
+            ->route('students.index')
+            ->with(
+                'success',
+                "Import selesai. Baru: {$import->created}, Update: {$import->updated}, Dilewati: {$import->skipped}."
+            );
+    }
+    public function downloadTemplate()
+    {
+        $export = new class implements FromArray, WithHeadings {
+            public function headings(): array
+            {
+                return [
+                    'nis',
+                    'nama',
+                    'jenjang',
+                    'kamar',
+                    'wa_ortu',
+                ];
+            }
+
+            public function array(): array
+            {
+                return [
+                    [
+                        '2024001',
+                        'Ahmad Fauzan',
+                        '12 IPS',
+                        'Ruqoyah',
+                        '6281234567890',
+                    ],
+                    [
+                        '2024002',
+                        'Fatimah Zahra',
+                        '11 IPA',
+                        'Aisyah',
+                        '6289876543210',
+                    ],
+                ];
+            }
+        };
+
+        return Excel::download($export, 'template-import-santri.xlsx');
     }
 }

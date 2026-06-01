@@ -23,6 +23,20 @@
   </x-slot:actions>
 </x-ui.page-header>
 
+@if(session('success'))
+  <div class="mb-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-black text-emerald-700">
+    <i class="bi bi-check-circle"></i>
+    {{ session('success') }}
+  </div>
+@endif
+
+@if(session('error'))
+  <div class="mb-6 rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm font-black text-red-700">
+    <i class="bi bi-x-circle"></i>
+    {{ session('error') }}
+  </div>
+@endif
+
 <x-ui.card class="mb-6">
   <form method="GET">
     <div class="grid gap-4 lg:grid-cols-5">
@@ -49,7 +63,7 @@
 
       <div>
         <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
-          Kelas
+          Jenjang
         </label>
         <x-ui.select name="kelas">
           <option value="">Semua</option>
@@ -90,16 +104,17 @@
   </form>
 </x-ui.card>
 
-<div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-  <x-ui.stat-card label="Total Santri" :value="$totalStudents" icon="bi-people" tone="blue" />
+<div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-6">
+  <x-ui.stat-card label="Total" :value="$totalStudents" icon="bi-people" tone="blue" />
   <x-ui.stat-card label="Hadir" :value="$hadirCount" icon="bi-check-circle" tone="emerald" />
-  <x-ui.stat-card label="Terlambat" :value="$terlambatCount" icon="bi-clock" tone="amber" />
-  <x-ui.stat-card label="Belum" :value="$belumCount" icon="bi-x-circle" tone="red" />
+  <x-ui.stat-card label="Telat" :value="$terlambatCount" icon="bi-clock" tone="amber" />
+  <x-ui.stat-card label="Izin" :value="$izinCount" icon="bi-envelope-check" tone="blue" />
+  <x-ui.stat-card label="Sakit" :value="$sakitCount" icon="bi-heart-pulse" tone="red" />
+  <x-ui.stat-card label="Alpa" :value="$belumCount" icon="bi-x-circle" tone="red" />
 </div>
 
 <div class="grid gap-6 lg:grid-cols-12">
 
-  {{-- Sudah Absen --}}
   <div class="lg:col-span-8">
     <x-ui.card padding="p-0">
 
@@ -109,18 +124,19 @@
         </div>
 
         <div class="text-sm font-medium text-slate-500">
-          {{ $selectedActivity?->name ?? '-' }} • {{ $date }}
+          {{ $selectedActivity?->name ?? '-' }} • {{ $date }} • {{ $attendances->count() }} data
         </div>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full min-w-[720px]">
+        <table class="w-full min-w-[760px]">
           <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-400">
             <tr>
               <th class="px-6 py-4">Santri</th>
               <th class="px-6 py-4">Status</th>
               <th class="px-6 py-4">Jam</th>
-              <th class="px-6 py-4">Kelas/Kamar</th>
+              <th class="px-6 py-4">Jenjang/Kamar</th>
+              <th class="px-6 py-4 text-right">Aksi</th>
             </tr>
           </thead>
 
@@ -138,6 +154,7 @@
                       <div class="font-black text-slate-900">
                         {{ $attendance->student->name }}
                       </div>
+
                       <div class="text-sm font-semibold text-slate-500">
                         {{ $attendance->student->nis }}
                       </div>
@@ -176,10 +193,31 @@
                     </x-ui.badge>
                   </div>
                 </td>
+
+                <td class="px-6 py-4 text-right">
+                  @if(in_array($attendance->status, ['izin', 'sakit', 'pulang']))
+                    <form
+                      method="POST"
+                      action="{{ route('activities.recap.cancel-status') }}"
+                      onsubmit="return confirm('Batalkan status manual ini?')">
+                      @csrf
+
+                      <input type="hidden" name="attendance_id" value="{{ $attendance->id }}">
+
+                      <button
+                        type="submit"
+                        class="rounded-xl bg-red-50 px-3 py-2 text-xs font-black text-red-600 transition hover:bg-red-100">
+                        Batalkan
+                      </button>
+                    </form>
+                  @else
+                    <span class="text-xs font-bold text-slate-300">-</span>
+                  @endif
+                </td>
               </tr>
             @empty
               <tr>
-                <td colspan="4" class="p-10">
+                <td colspan="5" class="p-10">
                   <x-ui.empty-state
                     title="Belum ada absensi"
                     subtitle="Belum ada santri yang scan kegiatan."
@@ -191,22 +229,15 @@
         </table>
       </div>
 
-      @if(method_exists($attendances, 'hasPages') && $attendances->hasPages())
-        <div class="border-t border-slate-100 p-5">
-          {{ $attendances->links() }}
-        </div>
-      @endif
-
     </x-ui.card>
   </div>
 
-  {{-- Belum Absen --}}
   <div class="lg:col-span-4">
     <x-ui.card padding="p-0">
 
       <div class="border-b border-slate-100 p-5">
         <div class="text-lg font-black text-slate-900">
-          Belum Absen
+          Alpa / Belum Absen
         </div>
 
         <div class="text-sm font-medium text-slate-500">
@@ -242,8 +273,7 @@
                   </x-ui.badge>
                 </div>
 
-                <div class="mt-4 flex flex-wrap gap-2">
-
+                <div class="mt-4 grid grid-cols-3 gap-2">
                   <form method="POST" action="{{ route('activities.recap.mark-status') }}">
                     @csrf
                     <input type="hidden" name="activity_id" value="{{ $selectedActivity?->id }}">
@@ -251,7 +281,9 @@
                     <input type="hidden" name="date" value="{{ $date }}">
                     <input type="hidden" name="status" value="izin">
 
-                    <button class="rounded-2xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-600">
+                    <button
+                      type="submit"
+                      class="w-full rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-600 transition hover:bg-blue-100">
                       Izin
                     </button>
                   </form>
@@ -263,7 +295,9 @@
                     <input type="hidden" name="date" value="{{ $date }}">
                     <input type="hidden" name="status" value="sakit">
 
-                    <button class="rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600">
+                    <button
+                      type="submit"
+                      class="w-full rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 transition hover:bg-amber-100">
                       Sakit
                     </button>
                   </form>
@@ -275,11 +309,12 @@
                     <input type="hidden" name="date" value="{{ $date }}">
                     <input type="hidden" name="status" value="pulang">
 
-                    <button class="rounded-2xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-black text-slate-600">
+                    <button
+                      type="submit"
+                      class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-200">
                       Pulang
                     </button>
                   </form>
-
                 </div>
               </div>
             </div>
@@ -288,7 +323,7 @@
           <div class="p-8">
             <x-ui.empty-state
               title="Semua sudah terdata"
-              subtitle="Tidak ada santri yang belum absen."
+              subtitle="Tidak ada santri yang alpa/belum absen."
               icon="bi-check-circle" />
           </div>
         @endforelse

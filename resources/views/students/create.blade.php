@@ -51,11 +51,11 @@
               placeholder="Nomor induk santri" />
           </x-ui.form-group>
 
-          <x-ui.form-group label="Kelas">
+          <x-ui.form-group label="Jenjang">
             <x-ui.input
               name="kelas"
               :value="old('kelas')"
-              placeholder="Contoh: Kelas 8" />
+              placeholder="Contoh: SMP" />
           </x-ui.form-group>
 
           <x-ui.form-group label="Kamar">

@@ -84,6 +84,10 @@ class RekapController extends Controller
         $kelasList = Student::whereNotNull('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
         $kamarList = Student::whereNotNull('kamar')->distinct()->orderBy('kamar')->pluck('kamar');
 
+        $sakitCount = (clone $attQuery)->where('status', 'sakit')->count();
+        $udzurCount = (clone $attQuery)->where('status', 'udzur')->count();
+        $pulangCount = (clone $attQuery)->where('status', 'pulang')->count();
+
         return view('rekap.index', compact(
             'date',
             'prayers',
@@ -98,7 +102,10 @@ class RekapController extends Controller
             'terlambatCount',
             'belumCount',
             'attendances',
-            'absentStudents'
+            'absentStudents',
+            'sakitCount',
+            'udzurCount',
+            'pulangCount'
         ));
     }
 
@@ -166,6 +173,60 @@ class RekapController extends Controller
         $filename = 'Rekap-'.$selectedPrayer->name.'-'.$date.'.pdf';
         return $pdf->download($filename);
     }
+
+
+        public function markStatus(Request $request)
+        {
+            $data = $request->validate([
+                'student_id' => ['required', 'exists:students,id'],
+                'prayer_id' => ['required', 'exists:prayers,id'],
+                'date' => ['required', 'date'],
+                'status' => ['required', 'in:udzur,sakit,pulang'],
+            ]);
+
+            $session = AttendanceSession::firstOrCreate(
+                [
+                    'date' => $data['date'],
+                    'prayer_id' => $data['prayer_id'],
+                ],
+                [
+                    'status' => 'live',
+                ]
+            );
+
+            Attendance::updateOrCreate(
+                [
+                    'attendance_session_id' => $session->id,
+                    'student_id' => $data['student_id'],
+                ],
+                [
+                    'scanned_at' => now(),
+                    'status' => $data['status'],
+                ]
+            );
+
+            return back()->with('success', 'Status berhasil diperbarui.');
+        }
+
+
+        public function cancelStatus(Request $request)
+        {
+            $data = $request->validate([
+                'attendance_id' => ['required', 'exists:attendances,id'],
+            ]);
+
+            $attendance = Attendance::findOrFail($data['attendance_id']);
+
+            if (in_array($attendance->status, ['udzur', 'sakit', 'pulang'])) {
+                $attendance->delete();
+
+                return back()->with('success', 'Status manual berhasil dibatalkan.');
+            }
+
+            return back()->with('error', 'Absensi scan tidak bisa dibatalkan dari sini.');
+        }
+            
+
 
 
 }

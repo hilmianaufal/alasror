@@ -11,13 +11,22 @@
   icon="bi-people"
 >
   <x-slot:actions>
+    <x-ui.button :href="route('students.import.form')" variant="secondary">
+      <i class="bi bi-file-earmark-spreadsheet"></i>
+      Import
+    </x-ui.button>
     <x-ui.button :href="route('students.create')">
       <i class="bi bi-plus-lg"></i>
       Tambah
     </x-ui.button>
   </x-slot:actions>
 </x-ui.page-header>
-
+@if(session('success'))
+  <div class="mb-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-black text-emerald-700">
+    <i class="bi bi-check-circle"></i>
+    {{ session('success') }}
+  </div>
+@endif
 <x-ui.card class="mb-6">
   <form method="GET" id="studentFilterForm">
     <div class="grid gap-4 md:grid-cols-4">
@@ -34,13 +43,13 @@
 
       <div>
         <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
-          Kelas
+          Jenjang
         </label>
         <x-ui.input
           id="studentKelasFilter"
           name="kelas"
           :value="$kelas"
-          placeholder="Contoh: 7A" />
+          placeholder="Contoh: SMP" />
       </div>
 
       <div>
@@ -76,7 +85,7 @@
         <thead class="border-b border-slate-100 bg-slate-50">
           <tr class="text-left text-xs font-black uppercase tracking-wide text-slate-400">
             <th class="px-6 py-4">Santri</th>
-            <th class="px-6 py-4">Kelas</th>
+            <th class="px-6 py-4">Jenjang</th>
             <th class="px-6 py-4">Kamar</th>
             <th class="px-6 py-4">Status</th>
             <th class="px-6 py-4 text-right">Aksi</th>

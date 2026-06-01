@@ -12,7 +12,7 @@
   </div>
 
   <div class="col-md-6">
-    <label class="form-label fw-semibold">Kelas</label>
+    <label class="form-label fw-semibold">Jenjang</label>
     <input name="kelas" value="{{ old('kelas', $student->kelas ?? '') }}" class="form-control" placeholder="contoh: 7A">
   </div>
 

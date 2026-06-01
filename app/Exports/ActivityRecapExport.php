@@ -25,7 +25,7 @@ class ActivityRecapExport implements FromArray, WithHeadings
             'Kegiatan',
             'NIS',
             'Nama',
-            'Kelas',
+            'Jenjang',
             'Kamar',
             'Status',
             'Jam Scan',
@@ -38,25 +38,20 @@ class ActivityRecapExport implements FromArray, WithHeadings
             ->whereDate('started_at', $this->date)
             ->first();
 
-        $rows = [];
-
         $studentsQuery = Student::query()
             ->where('is_active', true)
             ->when($this->kelas, fn ($q) => $q->where('kelas', $this->kelas))
             ->when($this->kamar, fn ($q) => $q->where('kamar', $this->kamar));
 
+        $students = (clone $studentsQuery)
+            ->orderBy('name')
+            ->get();
+
+        $rows = [];
+
         if (!$session) {
-            foreach ($studentsQuery->orderBy('name')->get() as $s) {
-                $rows[] = [
-                    $this->date,
-                    $this->activityName,
-                    $s->nis,
-                    $s->name,
-                    $s->kelas ?? '-',
-                    $s->kamar ?? '-',
-                    'belum',
-                    null,
-                ];
+            foreach ($students as $student) {
+                $rows[] = $this->makeRow($student, null);
             }
 
             return $rows;
@@ -66,37 +61,41 @@ class ActivityRecapExport implements FromArray, WithHeadings
             ->where('activity_session_id', $session->id)
             ->when($this->kelas, fn ($q) => $q->whereHas('student', fn ($s) => $s->where('kelas', $this->kelas)))
             ->when($this->kamar, fn ($q) => $q->whereHas('student', fn ($s) => $s->where('kamar', $this->kamar)))
-            ->orderBy('scanned_at')
-            ->get();
+            ->get()
+            ->keyBy('student_id');
 
-        foreach ($attendances as $a) {
-            $rows[] = [
-                $this->date,
-                $this->activityName,
-                $a->student->nis,
-                $a->student->name,
-                $a->student->kelas ?? '-',
-                $a->student->kamar ?? '-',
-                $a->status,
-                optional($a->scanned_at)->format('H:i:s'),
-            ];
-        }
+        foreach ($students as $student) {
+            $attendance = $attendances->get($student->id);
 
-        $presentIds = $attendances->pluck('student_id');
-
-        foreach ((clone $studentsQuery)->whereNotIn('id', $presentIds)->orderBy('name')->get() as $s) {
-            $rows[] = [
-                $this->date,
-                $this->activityName,
-                $s->nis,
-                $s->name,
-                $s->kelas ?? '-',
-                $s->kamar ?? '-',
-                'belum',
-                null,
-            ];
+            $rows[] = $this->makeRow($student, $attendance);
         }
 
         return $rows;
+    }
+
+    private function makeRow(Student $student, ?ActivityAttendance $attendance): array
+    {
+        return [
+            $this->date,
+            $this->activityName,
+            $student->nis,
+            $student->name,
+            $student->kelas ?? '-',
+            $student->kamar ?? '-',
+            $attendance ? $this->statusLabel($attendance->status) : 'Alpa',
+            $attendance?->scanned_at?->format('H:i:s'),
+        ];
+    }
+
+    private function statusLabel(?string $status): string
+    {
+        return match ($status) {
+            'hadir' => 'Hadir',
+            'terlambat' => 'Telat',
+            'izin' => 'Izin',
+            'sakit' => 'Sakit',
+            'pulang' => 'Pulang',
+            default => ucfirst((string) $status),
+        };
     }
 }
