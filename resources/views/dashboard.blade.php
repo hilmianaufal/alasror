@@ -99,14 +99,16 @@
       <div class="mt-2 text-xs font-black text-slate-700">Jadwal</div>
     </a>
 
-    <a href="{{ route('activities.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
-      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white">
-        <i class="bi bi-calendar-check"></i>
-      </div>
-      <div class="mt-2 text-xs font-black text-slate-700">Aktivitas</div>
-    </a>
-  @endcan
 
+  @endcan
+@can('manage_activities')
+  <a href="{{ route('activities.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white">
+      <i class="bi bi-calendar-check"></i>
+    </div>
+    <div class="mt-2 text-xs font-black text-slate-700">Aktivitas</div>
+  </a>
+@endcan
   @can('manage_users')
     <a href="{{ route('users.index') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
       <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-xl text-red-600 group-hover:bg-red-500 group-hover:text-white">
