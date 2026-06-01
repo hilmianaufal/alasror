@@ -75,8 +75,7 @@ class RekapController extends Controller
 
             $absentStudents = (clone $studentsQuery)
                 ->whereNotIn('id', $presentIds)
-                ->orderBy('name')
-                ->limit(30) // biar ringan, nanti bisa paginasi juga
+                ->orderBy('name')             
                 ->get();
         }
 
