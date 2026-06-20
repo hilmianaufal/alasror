@@ -12,6 +12,7 @@ class Student extends Model
         'name',
         'kelas',
         'kamar',
+        'gender',
         'is_active',
         'qr_token',
         'photo',

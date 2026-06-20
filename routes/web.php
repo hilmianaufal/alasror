@@ -3,10 +3,12 @@
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ActivityRecapController;
 use App\Http\Controllers\ActivityScanController;
+use App\Http\Controllers\ActivitySummaryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MonthlyRecapController;
 use App\Http\Controllers\PrayerController;
+use App\Http\Controllers\PrayerSummaryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QrScanController;
 use App\Http\Controllers\RekapController;
@@ -56,6 +58,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:view_reports')
         ->name('dashboard');
 
+
+
     /*
     |--------------------------------------------------------------------------
     | Scan QR - Petugas & Admin
@@ -81,6 +85,15 @@ Route::middleware('auth')->group(function () {
             ->name('students.search.realtime');
 
         Route::resource('students', StudentController::class);
+    });
+
+    Route::middleware('permission:manage_prayers')->group(function () {
+        Route::get('/jadwal-sholat', [PrayerController::class, 'index'])->name('prayers.index');
+        Route::get('/jadwal-sholat/create', [PrayerController::class, 'create'])->name('prayers.create');
+        Route::post('/jadwal-sholat', [PrayerController::class, 'store'])->name('prayers.store');
+        Route::get('/jadwal-sholat/{prayer}/edit', [PrayerController::class, 'edit'])->name('prayers.edit');
+        Route::put('/jadwal-sholat/{prayer}', [PrayerController::class, 'update'])->name('prayers.update');
+        Route::delete('/jadwal-sholat/{prayer}', [PrayerController::class, 'destroy'])->name('prayers.destroy');
     });
 
     /*
@@ -153,6 +166,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/rekap/status/cancel', [RekapController::class, 'cancelStatus'])
             ->name('rekap.cancel-status')
             ->middleware(['auth','permission:view_reports']);
+        Route::get('/rekap-salat', [PrayerSummaryController::class, 'daily'])
+    ->name('rekap.prayer-summary.daily');
+    Route::get('/rekap-salat/mingguan', [PrayerSummaryController::class, 'weekly'])
+    ->name('rekap.prayer-summary.weekly');
+    Route::get('/rekap-salat/bulanan', [PrayerSummaryController::class, 'monthly'])
+    ->name('rekap.prayer-summary.monthly');
     });
 
     /*
@@ -188,8 +207,48 @@ Route::middleware('auth')->group(function () {
     ->name('rekap.weekly.export.excel');
     Route::get('/students/{student}/id-card/png', [StudentQrController::class, 'idCardPng'])
         ->name('students.id-card.png');
+    Route::get(
+    '/rekap-kegiatan',
+    [ActivitySummaryController::class, 'daily']
+    )->name('rekap-kegiatan.daily');
 
+    Route::get('/rekap-kegiatan-umum', [ActivitySummaryController::class, 'daily'])
+    ->name('rekap-kegiatan.daily');
+
+Route::get('/rekap-diniyah', [ActivitySummaryController::class, 'dailyDiniyah'])
+    ->name('rekap-diniyah.daily');
+
+    Route::get(
+        '/rekap-diniyah',
+        [ActivitySummaryController::class, 'dailyDiniyah']
+    )->name('rekap-diniyah.daily');
+
+    Route::get('/rekap-kegiatan/mingguan', [ActivitySummaryController::class, 'weekly'])
+    ->name('rekap-kegiatan.weekly');
+    Route::get('/rekap-kegiatan/bulanan', [ActivitySummaryController::class, 'monthly'])
+    ->name('rekap-kegiatan.monthly');
+Route::get('/rekap-diniyah/mingguan', [ActivitySummaryController::class, 'diniyahWeekly'])
+    ->name('rekap-diniyah.weekly');
+
+
+    Route::get('/rekap-kegiatan/export/{period}', [ActivitySummaryController::class, 'exportExcel'])
+    ->defaults('category', 'umum')
+    ->name('rekap-kegiatan.export.excel');
+
+    Route::get('/rekap-diniyah/export/{period}', [ActivitySummaryController::class, 'exportExcel'])
+        ->defaults('category', 'diniyah')
+        ->name('rekap-diniyah.export.excel');
+
+    Route::get('/rekap-diniyah/bulanan', [ActivitySummaryController::class, 'diniyahMonthly'])
+    ->name('rekap-diniyah.monthly');
+
+    Route::get('/rekap-salat/export/{period}', [PrayerSummaryController::class, 'exportExcel'])
+    ->name('rekap.prayer-summary.export.excel');
     /*
+
+
+
+
     |--------------------------------------------------------------------------
     | User Management
     |--------------------------------------------------------------------------

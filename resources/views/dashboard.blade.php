@@ -62,7 +62,12 @@
       </div>
       <div class="mt-2 text-xs font-black text-slate-700">Rekap</div>
     </a>
-
+    <a href="{{ route('rekap.prayer-summary.daily') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white">
+        <i class="bi bi-list-check"></i>
+    </div>
+    <div class="mt-2 text-xs font-black text-slate-700">Rekap Salat</div>
+    </a>
     <a href="{{ route('rekap.monthly') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
       <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-xl text-cyan-600 group-hover:bg-cyan-500 group-hover:text-white">
         <i class="bi bi-calendar3"></i>
@@ -77,7 +82,7 @@
   <div class="mt-2 text-xs font-black text-slate-700">Mingguan</div>
 </a>
 
-<a href="{{ route('activities.recap') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
+<a href="{{ route('rekap-kegiatan.daily') }}" class="group rounded-[1.5rem] bg-white p-3 text-center shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
   <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-xl text-teal-600 group-hover:bg-teal-500 group-hover:text-white">
     <i class="bi bi-clipboard-check"></i>
   </div>

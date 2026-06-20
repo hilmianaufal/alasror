@@ -45,7 +45,7 @@
 
 
   <form method="GET">
-    <div class="grid gap-4 lg:grid-cols-5">
+    <div class="grid gap-4 lg:grid-cols-6">
 
       <div>
         <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
@@ -110,13 +110,23 @@
         </x-ui.select>
       </div>
 
+      <div>
+      <label class="mb-2 block text-xs font-black uppercase tracking-wide text-slate-400">
+          Putra / Putri
+      </label>
+
+      <x-ui.select name="gender">
+          <option value="">Semua</option>
+          <option value="putra" @selected($gender === 'putra')>Putra</option>
+          <option value="putri" @selected($gender === 'putri')>Putri</option>
+      </x-ui.select>
+      </div>
       <div class="flex items-end">
         <x-ui.button type="submit" class="w-full justify-center">
           <i class="bi bi-search"></i>
           Filter
         </x-ui.button>
       </div>
-
     </div>
   </form>
 </x-ui.card>

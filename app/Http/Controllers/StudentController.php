@@ -20,22 +20,32 @@ class StudentController extends Controller
         $q = $request->query('q');
         $kelas = $request->query('kelas');
         $kamar = $request->query('kamar');
+        $gender = $request->query('gender');
 
         $students = Student::query()
             ->when($q, fn($qr) => $qr->where(function($w) use ($q) {
                 $w->where('name', 'like', "%$q%")
-                  ->orWhere('nis', 'like', "%$q%");
+                ->orWhere('nis', 'like', "%$q%");
             }))
             ->when($kelas, fn($qr) => $qr->where('kelas', $kelas))
             ->when($kamar, fn($qr) => $qr->where('kamar', $kamar))
+            ->when($gender, fn($qr) => $qr->where('gender', $gender))
             ->orderBy('name')
             ->paginate(12)
             ->withQueryString();
 
-        $kelasList = Student::query()->whereNotNull('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
-        $kamarList = Student::query()->whereNotNull('kamar')->distinct()->orderBy('kamar')->pluck('kamar');
+        $kelasList = Student::whereNotNull('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
+        $kamarList = Student::whereNotNull('kamar')->distinct()->orderBy('kamar')->pluck('kamar');
 
-        return view('students.index', compact('students','q','kelas','kamar','kelasList','kamarList'));
+        return view('students.index', compact(
+            'students',
+            'q',
+            'kelas',
+            'kamar',
+            'gender',
+            'kelasList',
+            'kamarList'
+        ));
     }
 
     public function create()
@@ -51,6 +61,7 @@ class StudentController extends Controller
             'kelas'     => ['nullable','string','max:50'],
             'kamar'     => ['nullable','string','max:50'],
              'parent_phone' => ['nullable', 'string', 'max:30'],
+             'gender' => ['nullable', 'in:putra,putri'],
             'is_active' => ['nullable','boolean'],
             'photo'     => ['nullable','image','mimes:jpg,jpeg,png','max:2048'],
         ]);
@@ -96,6 +107,7 @@ class StudentController extends Controller
             'name'      => ['required','string','max:120'],
             'kelas'     => ['nullable','string','max:50'],
             'kamar'     => ['nullable','string','max:50'],
+            'gender' => ['nullable', 'in:putra,putri'],
             'is_active' => ['nullable','boolean'],
              'parent_phone' => ['nullable', 'string', 'max:30'],
             'photo'     => ['nullable','image','mimes:jpg,jpeg,png','max:2048'],
@@ -166,6 +178,7 @@ class StudentController extends Controller
                 'name' => $student->name,
                 'nis' => $student->nis,
                 'kelas' => $student->kelas,
+                'gender' => $student->gender,
                 'kamar' => $student->kamar,
                 'is_active' => $student->is_active,
                 'photo_url' => $student->photoUrl(),
@@ -210,6 +223,7 @@ class StudentController extends Controller
                     'nama',
                     'jenjang',
                     'kamar',
+                    'jenis_santri',
                     'wa_ortu',
                 ];
             }
@@ -217,21 +231,23 @@ class StudentController extends Controller
             public function array(): array
             {
                 return [
-                    [
-                        '2024001',
-                        'Ahmad Fauzan',
-                        '12 IPS',
-                        'Ruqoyah',
-                        '6281234567890',
-                    ],
-                    [
-                        '2024002',
-                        'Fatimah Zahra',
-                        '11 IPA',
-                        'Aisyah',
-                        '6289876543210',
-                    ],
-                ];
+                        [
+                            '2024001',
+                            'Ahmad Fauzan',
+                            '12 IPS',
+                            'Ruqoyah',
+                            'putra',
+                            '6281234567890',
+                        ],
+                        [
+                            '2024002',
+                            'Fatimah Zahra',
+                            '11 IPA',
+                            'Aisyah',
+                            'putri',
+                            '6289876543210',
+                        ],
+                    ];
             }
         };
 

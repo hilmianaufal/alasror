@@ -14,6 +14,17 @@ class StudentsImport implements ToCollection, WithHeadingRow
     public int $updated = 0;
     public int $skipped = 0;
 
+    private function normalizeGender($value): ?string
+    {
+        $value = strtolower(trim((string) $value));
+
+        return match ($value) {
+            'putra', 'laki-laki', 'laki laki', 'lk', 'l' => 'putra',
+            'putri', 'perempuan', 'pr', 'p' => 'putri',
+            default => null,
+        };
+    }
+
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
@@ -28,12 +39,13 @@ class StudentsImport implements ToCollection, WithHeadingRow
             $student = Student::where('nis', $nis)->first();
 
             $data = [
-                'name' => $nama,
-                'kelas' => $row['jenjang'] ?? null,
-                'kamar' => $row['kamar'] ?? null,
-                'parent_phone' => $row['wa_ortu'] ?? null,
-                'is_active' => true,
-            ];
+                    'name' => $nama,
+                    'kelas' => $row['jenjang'] ?? null,
+                    'kamar' => $row['kamar'] ?? null,
+                    'gender' => $this->normalizeGender($row['jenis_santri'] ?? null),
+                    'parent_phone' => $row['wa_ortu'] ?? null,
+                    'is_active' => true,
+                ];
 
             if ($student) {
                 $student->update($data);

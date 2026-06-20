@@ -62,6 +62,12 @@
           :value="$kamar"
           placeholder="Contoh: Umar" />
       </div>
+        <x-ui.select name="gender">
+        <option value="">Semua</option>
+        <option value="putra" @selected($gender === 'putra')>Putra</option>
+        <option value="putri" @selected($gender === 'putri')>Putri</option>
+        </x-ui.select>
+
 
       <div class="flex items-end gap-2">
         <x-ui.button type="submit" class="flex-1">
@@ -106,6 +112,11 @@
                     <div class="truncate font-black text-slate-900">
                       {{ $student->name }}
                     </div>
+                          @if($student->gender)
+                            <x-ui.badge tone="{{ $student->gender === 'putra' ? 'blue' : 'red' }}">
+                                {{ $student->gender === 'putra' ? 'Putra' : 'Putri' }}
+                            </x-ui.badge>
+                            @endif
                     <div class="mt-1 text-sm font-semibold text-slate-500">
                       {{ $student->nis }}
                     </div>

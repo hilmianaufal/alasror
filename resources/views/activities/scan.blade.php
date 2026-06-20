@@ -16,9 +16,14 @@
       Jadwal Kegiatan
     </x-ui.button>
 
-    <x-ui.button :href="route('activities.recap')" variant="secondary">
+    <x-ui.button :href="route('rekap-kegiatan.daily')" variant="secondary">
       <i class="bi bi-clipboard-check"></i>
-      Rekap
+      Rekap Kegiatan
+    </x-ui.button>
+
+    <x-ui.button :href="route('rekap-diniyah.daily')" variant="secondary">
+      <i class="bi bi-book"></i>
+      Rekap Diniyah
     </x-ui.button>
   </x-slot:actions>
 </x-ui.page-header>

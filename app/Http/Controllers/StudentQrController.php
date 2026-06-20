@@ -166,28 +166,41 @@ class StudentQrController extends Controller
             $this->centerTextInBox($img, $student->kamar ?: '-', 30, 480, 940, 780, $white, $fontBold);
 
             // QR card
-            $this->drawRoundedRect($img, 90, 1060, 810, 1275, 36, $white);
+            // QR card
+$this->drawRoundedRect($img, 90, 1040, 810, 1285, 36, $white);
 
-            $builder = new Builder(
-                writer: new PngWriter(),
-                writerOptions: [],
-                validateResult: false,
-                data: $student->qr_token,
-                size: 260,
-                margin: 8
-            );
+$builder = new Builder(
+    writer: new PngWriter(),
+    writerOptions: [],
+    validateResult: false,
+    data: $student->qr_token,
+    size: 320,
+    margin: 8
+);
 
-            $result = $builder->build();
-            $qrTemp = imagecreatefromstring($result->getString());
+$result = $builder->build();
+$qrTemp = imagecreatefromstring($result->getString());
 
-            imagecopyresampled($img, $qrTemp, 125, 1085, 0, 0, 165, 165, imagesx($qrTemp), imagesy($qrTemp));
-            imagedestroy($qrTemp);
+imagecopyresampled(
+    $img,
+    $qrTemp,
+    120,
+    1060,
+    0,
+    0,
+    205,
+    205,
+    imagesx($qrTemp),
+    imagesy($qrTemp)
+);
 
-            imagettftext($img, 22, 0, 330, 1125, $gray, $fontBold, 'SCAN QR');
-            imagettftext($img, 30, 0, 330, 1175, $slate, $fontBold, 'Absensi Santri');
+imagedestroy($qrTemp);
 
-            $token = substr($student->qr_token, 0, 28) . '...';
-            imagettftext($img, 18, 0, 330, 1225, $gray, $fontRegular, $token);
+imagettftext($img, 22, 0, 350, 1125, $gray, $fontBold, 'SCAN QR');
+imagettftext($img, 30, 0, 350, 1175, $slate, $fontBold, 'Absensi Santri');
+
+$token = substr($student->qr_token, 0, 28) . '...';
+imagettftext($img, 18, 0, 350, 1225, $gray, $fontRegular, $token);
 
             // Footer
             imagettftext($img, 22, 0, 70, 1310, $textSoft, $fontBold, 'Valid Permanent');

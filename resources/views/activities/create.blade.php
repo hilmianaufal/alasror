@@ -43,7 +43,19 @@
                 placeholder="Contoh: Muhadhoroh, Roan, Kajian Malam" />
             </x-ui.form-group>
           </div>
+            <x-ui.form-group label="Kategori">
+                <x-ui.select name="category">
 
+                    <option value="umum">
+                        Kegiatan Umum
+                    </option>
+
+                    <option value="diniyah">
+                        Kegiatan Diniyah
+                    </option>
+
+                </x-ui.select>
+            </x-ui.form-group>
           <x-ui.form-group label="Tipe Kegiatan" required>
             <x-ui.select name="type" id="type">
               <option value="routine" @selected(old('type', 'manual') === 'routine')>

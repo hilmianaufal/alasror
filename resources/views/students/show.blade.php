@@ -52,7 +52,14 @@
           @endif
         </div>
       </div>
-
+        <div class="rounded-2xl bg-purple-50 p-4">
+        <div class="text-xs font-black uppercase tracking-wide text-purple-400">
+            Jenis Santri
+        </div>
+        <div class="mt-1 font-black text-purple-700">
+            {{ $student->gender === 'putra' ? 'Putra' : ($student->gender === 'putri' ? 'Putri' : '-') }}
+        </div>
+        </div>
       <div class="mt-8 grid grid-cols-2 gap-3">
         <div class="rounded-2xl bg-blue-50 p-4 text-center">
           <div class="text-xs font-black uppercase tracking-wide text-blue-400">
@@ -183,12 +190,12 @@
         </div>
 
         {{-- QR --}}
-        <div class="mt-6 rounded-[1.5rem] bg-white p-4 text-slate-900 shadow-xl">
-          <div class="flex items-center gap-4">
+        <div class="mt-6 rounded-[1.5rem] bg-white p-3 text-slate-900 shadow-xl">
+        <div class="flex items-center gap-3">
             <img
-              src="{{ route('students.qr.show', $student) }}"
-              alt="QR {{ $student->nis }}"
-              class="h-24 w-24 rounded-xl object-contain">
+            src="{{ route('students.qr.show', $student) }}"
+            alt="QR {{ $student->nis }}"
+            class="h-40 w-40 shrink-0 rounded-xl object-contain">
 
             <div class="min-w-0 flex-1">
               <div class="text-xs font-black uppercase tracking-wide text-slate-400">

@@ -15,11 +15,18 @@
   subtitle="Atur jam buka/tutup scan dan toleransi keterlambatan"
   icon="bi-clock-history"
 >
-  <x-slot:actions>
-    <x-ui.button :href="route('dashboard')" variant="secondary">
-      Dashboard
-    </x-ui.button>
-  </x-slot:actions>
+<x-slot:actions>
+
+  <x-ui.button :href="route('prayers.create')">
+    <i class="bi bi-plus-circle"></i>
+    Tambah Sholat
+  </x-ui.button>
+
+  <x-ui.button :href="route('dashboard')" variant="secondary">
+    Dashboard
+  </x-ui.button>
+
+</x-slot:actions>
 </x-ui.page-header>
 
 <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
@@ -100,14 +107,32 @@
               </td>
 
               <td class="px-6 py-4">
-                <div class="flex justify-end">
-                  <x-ui.button
-                    :href="route('prayers.edit', $prayer)"
-                    variant="secondary">
-                    <i class="bi bi-pencil"></i>
-                    Edit
-                  </x-ui.button>
-                </div>
+                    <div class="flex justify-end gap-2">
+
+                    <x-ui.button
+                        :href="route('prayers.edit', $prayer)"
+                        variant="secondary">
+                        <i class="bi bi-pencil"></i>
+                        Edit
+                    </x-ui.button>
+
+                    <form
+                        action="{{ route('prayers.destroy', $prayer) }}"
+                        method="POST"
+                        onsubmit="return confirm('Hapus jadwal sholat ini?')">
+
+                        @csrf
+                        @method('DELETE')
+
+                        <x-ui.button
+                            type="submit"
+                            variant="danger">
+                            <i class="bi bi-trash"></i>
+                            Hapus
+                        </x-ui.button>
+                    </form>
+
+                    </div>
               </td>
             </tr>
           @empty
@@ -164,16 +189,27 @@
             <x-ui.badge tone="slate">
               Urutan {{ $prayer->order }}
             </x-ui.badge>
-          </div>
 
-          <div class="mt-4">
-            <x-ui.button
-              :href="route('prayers.edit', $prayer)"
-              variant="secondary"
-              class="w-full justify-center">
-              <i class="bi bi-pencil"></i>
-              Edit Jadwal
-            </x-ui.button>
+            <form
+                action="{{ route('prayers.destroy', $prayer) }}"
+                method="POST"
+                class="mt-2"
+                onsubmit="return confirm('Hapus jadwal sholat ini?')">
+
+                @csrf
+                @method('DELETE')
+
+                <x-ui.button
+                    type="submit"
+                    variant="danger"
+                    class="w-full justify-center">
+
+                    <i class="bi bi-trash"></i>
+                    Hapus Jadwal
+
+                </x-ui.button>
+
+            </form>
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ class Activity extends Model
     protected $fillable = [
         'name',
         'type',
+        'category',
         'days',
         'event_date',
         'order',

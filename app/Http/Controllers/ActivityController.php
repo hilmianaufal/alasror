@@ -26,6 +26,7 @@ class ActivityController extends Controller
             'type' => ['required', 'in:routine,manual'],
             'days' => ['nullable', 'array'],
             'days.*' => ['integer', 'between:0,6'],
+            'category' => ['required', 'in:umum,diniyah'],
             'event_date' => ['nullable', 'date'],
             'start_time' => ['required'],
             'end_time' => ['required'],
@@ -64,6 +65,7 @@ class ActivityController extends Controller
             'event_date' => ['nullable', 'date'],
             'start_time' => ['required'],
             'end_time' => ['required'],
+            'category' => ['required', 'in:umum,diniyah'],
             'late_minutes' => ['required', 'integer', 'min:0', 'max:180'],
             'is_active' => ['nullable'],
         ]);

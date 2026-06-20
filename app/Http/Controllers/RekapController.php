@@ -20,7 +20,7 @@ class RekapController extends Controller
         $date = $request->input('date', Carbon::today()->toDateString());
         $groupKelas = $request->input('kelas'); // string
         $groupKamar = $request->input('kamar'); // string
-
+        $gender = $request->input('gender');
         $prayers = Prayer::where('is_active', true)->orderBy('order')->get();
 
         // default: sholat aktif jika ada, kalau tidak: prayer pertama
@@ -49,8 +49,8 @@ class RekapController extends Controller
             ->with(['student'])
             ->when($session, fn($q) => $q->where('attendance_session_id', $session->id))
             ->when($groupKelas, fn($q) => $q->whereHas('student', fn($s) => $s->where('kelas', $groupKelas)))
-            ->when($groupKamar, fn($q) => $q->whereHas('student', fn($s) => $s->where('kamar', $groupKamar)));
-
+            ->when($groupKamar, fn($q) => $q->whereHas('student', fn($s) => $s->where('kamar', $groupKamar)))
+            ->when($gender, fn ($q) => $q->where('gender', $gender));
         $hadirCount = (clone $attQuery)->where('status', 'hadir')->count();
         $terlambatCount = (clone $attQuery)->where('status', 'terlambat')->count();
         $sudahCount = $hadirCount + $terlambatCount;
@@ -75,7 +75,7 @@ class RekapController extends Controller
 
             $absentStudents = (clone $studentsQuery)
                 ->whereNotIn('id', $presentIds)
-                ->orderBy('name')             
+                ->orderBy('name')
                 ->get();
         }
 
@@ -93,6 +93,7 @@ class RekapController extends Controller
             'selectedPrayer',
             'prayerId',
             'kelasList',
+            'gender',
             'kamarList',
             'groupKelas',
             'groupKamar',
@@ -253,7 +254,7 @@ class RekapController extends Controller
 
             return back()->with('error', 'Absensi scan tidak bisa dibatalkan dari sini.');
         }
-            
+
 
 
 

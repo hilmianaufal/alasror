@@ -184,9 +184,9 @@ body {
 }
 
 .qr-img {
-  width: 86px;
-  height: 86px;
-  object-fit: contain;
+    width: 200px;
+    height: 200px;
+    border: 5px solid red;
 }
 
 .qr-title {
@@ -279,7 +279,7 @@ body {
     <div class="qr-card">
       <table class="qr-table">
         <tr>
-          <td style="width:96px;">
+          <td style="width:290px;">
             <img src="{{ route('students.qr.show', $student) }}" class="qr-img">
           </td>
           <td>

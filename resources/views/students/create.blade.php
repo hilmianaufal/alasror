@@ -65,6 +65,20 @@
               placeholder="Contoh: Al Mukaromah" />
           </x-ui.form-group>
 
+            <x-ui.form-group label="Jenis Santri">
+            <x-ui.select name="gender">
+                <option value="">Pilih jenis santri</option>
+
+                <option value="putra" @selected(old('gender') === 'putra')>
+                Putra
+                </option>
+
+                <option value="putri" @selected(old('gender') === 'putri')>
+                Putri
+                </option>
+            </x-ui.select>
+            </x-ui.form-group>
+
           <x-ui.form-group label="Nomor WhatsApp Ortu">
               <x-ui.input
                 name="parent_phone"

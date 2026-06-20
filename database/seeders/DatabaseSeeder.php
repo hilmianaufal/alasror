@@ -18,5 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call(ActivitySeeder::class);
 
         $this->call(RolesAndPermissionsSeeder::class);
+        $this->call([
+                StudentSeeder::class,
+            ]);
     }
 }
