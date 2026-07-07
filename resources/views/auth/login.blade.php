@@ -78,7 +78,7 @@
         <div class="mb-8 text-center lg:hidden">
           <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.7rem] bg-gradient-to-br from-emerald-600 to-lime-400 shadow-xl shadow-emerald-300/50">
             <img
-              src="{{ asset('images/logo.png.png') }}"
+              src="{{ asset('images/logo.png') }}"
               alt="Logo SIDAPDA"
               class="h-14 w-14 object-contain">
           </div>
