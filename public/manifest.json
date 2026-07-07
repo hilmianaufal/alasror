@@ -1,5 +1,5 @@
 {
-  "name": "Absensi Jamaah Sholat",
+  "name": "Absensi Kegiatan",
   "short_name": "Absensi Kegiatan",
   "description": "Absensi Kegiatan Pondok Pesantren Al Asror",
   "start_url": "/login",
@@ -9,12 +9,12 @@
   "theme_color": "#16a34a",
   "icons": [
     {
-      "src": "/pwa/icon-192.png",
+      "src": "/pwa/icon-192-v1.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/pwa/icon-512.png",
+      "src": "/pwa/icon-512-v1.png",
       "sizes": "512x512",
       "type": "image/png"
     }
