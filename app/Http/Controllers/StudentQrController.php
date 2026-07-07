@@ -118,15 +118,15 @@ class StudentQrController extends Controller
                 abort(500, 'Font belum tersedia. Simpan arial.ttf dan arialbd.ttf di public/fonts.');
             }
 
-            $logoPath = public_path('images/logo.png.PNG');
+            $logoPath = public_path('images/logo.png');
             $photoPath = $student->photo && file_exists(public_path($student->photo))
                 ? public_path($student->photo)
                 : public_path('images/default.jpg');
 
             // Header text
             imagettftext($img, 24, 0, 70, 95, $textSoft, $fontBold, 'S T U D E N T   I D');
-            imagettftext($img, 52, 0, 70, 160, $white, $fontBold, 'SIDAPDA');
-            imagettftext($img, 24, 0, 70, 215, $textSoft, $fontBold, 'Pondok Pesantren Darussalam');
+            imagettftext($img, 52, 0, 70, 160, $white, $fontBold, 'SIABSEN');
+            imagettftext($img, 24, 0, 70, 215, $textSoft, $fontBold, 'Pondok Pesantren Al Asror');
 
             // Logo
             $this->drawRoundedRect($img, 680, 55, 830, 205, 34, $white);

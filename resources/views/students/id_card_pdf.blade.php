@@ -241,8 +241,8 @@ body {
   <div class="inner">
     <div class="header">
       <div class="small-title">STUDENT ID</div>
-      <div class="brand">SIDAPDA</div>
-      <div class="sub">Pondok Pesantren Darussalam</div>
+      <div class="brand">SIABSEN</div>
+      <div class="sub">Pondok Pesantren Al Asror</div>
 
       <div class="logo">
         @if(file_exists($logoPath))
