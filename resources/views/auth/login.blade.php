@@ -35,17 +35,17 @@
           <div>
             <div class="flex h-20 w-20 items-center justify-center rounded-[1.7rem] bg-white shadow-2xl shadow-emerald-950/20">
               <img
-                src="{{ asset('images/logo.png.png') }}"
+                src="{{ asset('images/logo.png') }}"
                 alt="Logo SIDAPDA"
                 class="h-14 w-14 object-contain">
             </div>
 
             <h1 class="mt-8 text-4xl font-black tracking-tight">
-              SIDAPDA
+              SIABSEN
             </h1>
 
             <p class="mt-3 max-w-sm text-base font-medium leading-relaxed text-white/80">
-              Sistem Informasi Digital Absensi Pondok Darussalam berbasis QR Code.
+              Sistem Informasi Digital Absensi Pondok Al Asror berbasis QR Code.
             </p>
           </div>
 

@@ -4,7 +4,7 @@
     <div class="flex h-24 items-center gap-3 px-6">
         <div class="flex h-[52px] w-[52px] items-center justify-center overflow-hidden rounded-[1.4rem] bg-white shadow-xl shadow-emerald-300/40 ring-2 ring-emerald-100">
             <img
-                src="{{ asset('images/logo.png.PNG') }}"
+                src="{{ asset('images/logo.png') }}"
                 alt="Logo"
                 class="h-10 w-10 object-contain"
             >
@@ -12,7 +12,7 @@
 
         <div>
             <div class="text-xl font-black tracking-tight text-emerald-950">
-                SIDAPDA
+                SIABSEN
             </div>
             <div class="text-xs font-semibold uppercase tracking-wider text-emerald-500">
                 Sistem Informasi Digital Absensi

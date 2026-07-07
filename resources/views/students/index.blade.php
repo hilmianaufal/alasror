@@ -141,15 +141,30 @@
               </td>
 
               <td class="px-6 py-4">
-                <div class="flex justify-end gap-2">
-                  <x-ui.button :href="route('students.show', $student)" variant="secondary">
-                    <i class="bi bi-eye"></i>
-                  </x-ui.button>
+                    <div class="flex justify-end gap-2">
 
-                  <x-ui.button :href="route('students.edit', $student)" variant="secondary">
-                    <i class="bi bi-pencil"></i>
-                  </x-ui.button>
-                </div>
+                        <x-ui.button :href="route('students.show', $student)" variant="secondary">
+                            <i class="bi bi-eye"></i>
+                        </x-ui.button>
+
+                        <x-ui.button :href="route('students.edit', $student)" variant="secondary">
+                            <i class="bi bi-pencil"></i>
+                        </x-ui.button>
+
+                        <form action="{{ route('students.destroy', $student) }}"
+                            method="POST"
+                            class="delete-form">
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-red-500 text-white transition hover:bg-red-600">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+
+                    </div>
               </td>
             </tr>
           @empty
@@ -198,20 +213,36 @@
             @endif
           </div>
 
-          <div class="mt-4 flex gap-2">
-            <x-ui.button
-              :href="route('students.show', $student)"
-              variant="secondary"
-              class="flex-1">
-              Detail
-            </x-ui.button>
+            <div class="mt-4 flex gap-2">
 
-            <x-ui.button
-              :href="route('students.edit', $student)"
-              class="flex-1">
-              Edit
-            </x-ui.button>
-          </div>
+                <x-ui.button
+                    :href="route('students.show', $student)"
+                    variant="secondary"
+                    class="flex-1">
+                    Detail
+                </x-ui.button>
+
+                <x-ui.button
+                    :href="route('students.edit', $student)"
+                    class="flex-1">
+                    Edit
+                </x-ui.button>
+
+                <form action="{{ route('students.destroy', $student) }}"
+                    method="POST"
+                    class="delete-form flex-1">
+                    @csrf
+                    @method('DELETE')
+
+                    <button
+                        type="submit"
+                        class="w-full rounded-2xl bg-red-500 py-2 font-bold text-white hover:bg-red-600">
+                        <i class="bi bi-trash"></i>
+                        Hapus
+                    </button>
+                </form>
+
+            </div>
         </div>
       </div>
     </x-ui.card>
