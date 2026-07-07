@@ -84,7 +84,7 @@
           </div>
 
           <div class="mt-4 text-2xl font-black text-emerald-950">
-            SIDAPDA
+            SIABSEN
           </div>
 
           <div class="mt-1 text-sm font-semibold text-slate-500">
