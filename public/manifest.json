@@ -1,7 +1,7 @@
 {
   "name": "Absensi Jamaah Sholat",
-  "short_name": "Absensi Sholat",
-  "description": "Absensi Jamaah Sholat 5 Waktu - Pondok Kebon Jambu (Santri Putri)",
+  "short_name": "Absensi Kegiatan",
+  "description": "Absensi Kegiatan Pondok Pesantren Al Asror",
   "start_url": "/login",
   "scope": "/",
   "display": "standalone",
