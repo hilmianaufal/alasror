@@ -224,7 +224,7 @@ window.__HAS_ACTIVE_ACTIVITY__ = @json((bool) $activeActivity);
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const csrf = @json(csrf_token());
-  const scanUrl = @json(route('activities.scan.store'));
+  const scanUrl = @json(route('activities.scan.store', [], false));
   const hasActiveActivity = window.__HAS_ACTIVE_ACTIVITY__;
 
   const alertBox  = document.getElementById('alertBox');
